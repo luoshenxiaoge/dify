@@ -1,0 +1,36 @@
+{
+  "account": {
+    "email": "1912263143@qq.com",
+    "display_name": "20250600909"
+  },
+  "models": [
+    "qwen3.6-plus",
+    "text-embedding-v4",
+    "qwen3-rerank"
+  ],
+  "knowledge_name": "QA迁移验证20261023",
+  "dify_dataset_id": "429e33e2-ec50-41d3-b5a5-2fbf673e22d0",
+  "dify_document_id": "56c248da-7834-4857-858a-567ca20e46b8",
+  "dify_qa_segments": 16,
+  "studio_project_id": "0",
+  "studio_workspace_id": "848fc50c734b439c86d808e465de7dee",
+  "studio_knowledge_repo_id": "532ae6f4f8384e6da7ac967f70622558",
+  "studio_document_id": "doc_a9a6f785e2d0426799f02e5bf605a103",
+  "studio_document_status": "INDEXED",
+  "studio_qa_segments": 19,
+  "all_answers_nonempty": true,
+  "rerank_enabled_in_both_systems": true,
+  "test_query": "晨星验证项目的数据保留期是多久？",
+  "expected_answer": "90天",
+  "dify_retrieval_passed": true,
+  "studio_retrieval_passed": true,
+  "migration_strategy": "source_file",
+  "migration_status": "SUCCEEDED",
+  "source_sha256": "0b3fd6a80c11c1a0838470efab3c2d3afa04673be6aa3577933be97b0b2db6e6",
+  "target_source_identical": true,
+  "repeat_migration_skipped": true,
+  "backend_qa_limitations": [
+    "make is not installed",
+    "unit test collection requires pymilvus"
+  ]
+}

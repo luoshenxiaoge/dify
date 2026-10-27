@@ -1,0 +1,63 @@
+[
+  {
+    "Name": "backend",
+    "ProcessId": 26240,
+    "Arguments": [
+      "run",
+      "--project",
+      "D:/PycharmProjects/dify-1104/api",
+      "--no-sync",
+      "flask",
+      "--app",
+      "app",
+      "run",
+      "--host",
+      "0.0.0.0",
+      "--port=5001",
+      "--debug"
+    ],
+    "StartedAt": "2026-10-23T14:35:49.2003416+08:00"
+  },
+  {
+    "Name": "worker",
+    "ProcessId": 19756,
+    "Arguments": [
+      "run",
+      "--project",
+      "D:/PycharmProjects/dify-1104/api",
+      "--no-sync",
+      "celery",
+      "-A",
+      "app.celery",
+      "worker",
+      "-P",
+      "gevent",
+      "-c",
+      "2",
+      "--loglevel",
+      "INFO",
+      "-Q",
+      "dataset,generation,mail,ops_trace,app_deletion,plugin,workflow_storage,conversation"
+    ],
+    "StartedAt": "2026-10-23T14:35:49.2209484+08:00"
+  },
+  {
+    "Name": "beat",
+    "ProcessId": 11236,
+    "Arguments": [
+      "run",
+      "--project",
+      "D:/PycharmProjects/dify-1104/api",
+      "--no-sync",
+      "celery",
+      "-A",
+      "app.celery",
+      "beat",
+      "--loglevel",
+      "INFO",
+      "--schedule",
+      "D:/PycharmProjects/dify-1104/.codex/celerybeat-schedule"
+    ],
+    "StartedAt": "2026-10-23T14:35:49.2358644+08:00"
+  }
+]

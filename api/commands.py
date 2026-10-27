@@ -32,7 +32,15 @@ from libs.helper import email as email_validate
 from libs.password import hash_password, password_pattern, valid_password
 from libs.rsa import generate_key_pair
 from models import Tenant
-from models.dataset import Dataset, DatasetCollectionBinding, DatasetMetadata, DatasetMetadataBinding, DocumentSegment
+from models.dataset import (
+    ChildChunk,
+    Dataset,
+    DatasetCollectionBinding,
+    DatasetMetadata,
+    DatasetMetadataBinding,
+    DatasetProcessRule,
+    DocumentSegment,
+)
 from models.dataset import Document as DatasetDocument
 from models.model import Account, App, AppAnnotationSetting, AppMode, Conversation, MessageAnnotation, UploadFile
 from models.oauth import DatasourceOauthParamConfig, DatasourceProvider
@@ -45,9 +53,534 @@ from services.clear_free_plan_tenant_expired_logs import ClearFreePlanTenantExpi
 from services.plugin.data_migration import PluginDataMigration
 from services.plugin.plugin_migration import PluginMigration
 from services.plugin.plugin_service import PluginService
+from services.dify_kb_migration import DifyKnowledgeMigrator, MigrationSettings, StudioManagerClient
 from tasks.remove_app_and_related_data_task import delete_draft_variables_batch
 
 logger = logging.getLogger(__name__)
+
+
+def _knowledge_inventory_value(value: Any) -> Any:
+    """将 ORM 字段转换为可直接 JSON 序列化的值。"""
+    if value is None or isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, dict):
+        return {
+            str(key): (
+                "***"
+                if str(key).lower().replace("-", "_")
+                in {"api_key", "apikey", "password", "secret", "token", "authorization", "access_key"}
+                else _knowledge_inventory_value(item)
+            )
+            for key, item in value.items()
+        }
+    if isinstance(value, (list, tuple, set)):
+        return [_knowledge_inventory_value(item) for item in value]
+    if hasattr(value, "value"):
+        return _knowledge_inventory_value(value.value)
+    if hasattr(value, "isoformat"):
+        return value.isoformat()
+    return str(value)
+
+
+def _knowledge_inventory_count(rows: list[Any], field_name: str) -> int:
+    return sum(int(getattr(row, field_name) or 0) for row in rows)
+
+
+def _knowledge_inventory_upload_file_id(document: DatasetDocument) -> str | None:
+    """兼容 Dify 不同版本将上传文件 ID 写入 data_source_info 的情况。"""
+    if document.file_id:
+        return document.file_id
+    upload_file_id = document.data_source_info_dict.get("upload_file_id")
+    return str(upload_file_id) if upload_file_id else None
+
+
+@click.command(
+    "list-dify-knowledge-inventory",
+    help="以 JSON 列出 Dify 空间、知识库、文档、来源文件与分段统计（只读）。",
+)
+@click.option("--tenant-id", "tenant_ids", multiple=True, help="仅列出指定空间；可重复传入。")
+@click.option("--dataset-id", "dataset_ids", multiple=True, help="仅列出指定知识库；可重复传入。")
+@click.option("--spaces-only", is_flag=True, default=False, help="仅输出空间信息及基础统计，不展开知识库和文档。")
+@click.option("--summary-only", is_flag=True, default=False, help="仅输出空间和知识库汇总，不展开文档。")
+@click.option(
+    "--include-segments/--no-include-segments",
+    default=True,
+    show_default=True,
+    help="是否输出每个文档的分段、可用分段与子块统计。",
+)
+def list_dify_knowledge_inventory(
+    tenant_ids: tuple[str, ...],
+    dataset_ids: tuple[str, ...],
+    spaces_only: bool,
+    summary_only: bool,
+    include_segments: bool,
+):
+    """生成迁移前核对使用的 Dify 知识库清单，不读取文档或分段正文。"""
+    session = sessionmaker(db.engine, expire_on_commit=False)()
+    try:
+        if spaces_only and dataset_ids:
+            raise click.UsageError("--spaces-only 不能与 --dataset-id 一起使用。")
+        logger.info(
+            "开始生成 Dify 知识库清单：tenant_ids=%s dataset_ids=%s spaces_only=%s summary_only=%s include_segments=%s",
+            list(tenant_ids),
+            list(dataset_ids),
+            spaces_only,
+            summary_only,
+            include_segments,
+        )
+        tenant_stmt = select(Tenant).order_by(Tenant.created_at.asc(), Tenant.name.asc())
+        if tenant_ids:
+            tenant_stmt = tenant_stmt.where(Tenant.id.in_(tenant_ids))
+        tenants = list(session.scalars(tenant_stmt).all())
+        logger.info("Dify 知识库清单：已读取 %d 个空间。", len(tenants))
+        selected_tenant_ids = [tenant.id for tenant in tenants]
+
+        if spaces_only:
+            dataset_counts = {}
+            document_counts = {}
+            segment_counts_by_tenant = {}
+            child_chunk_counts_by_tenant = {}
+            if selected_tenant_ids:
+                dataset_counts = {
+                    row.tenant_id: int(row.total)
+                    for row in session.execute(
+                        select(Dataset.tenant_id, sa.func.count(Dataset.id).label("total"))
+                        .where(Dataset.tenant_id.in_(selected_tenant_ids))
+                        .group_by(Dataset.tenant_id)
+                    ).all()
+                }
+                document_counts = {
+                    row.tenant_id: {"total": int(row.total), "available": int(row.available)}
+                    for row in session.execute(
+                        select(
+                            Dataset.tenant_id,
+                            sa.func.count(DatasetDocument.id).label("total"),
+                            sa.func.coalesce(
+                                sa.func.sum(
+                                    sa.case(
+                                        (
+                                            sa.and_(
+                                                DatasetDocument.indexing_status == "completed",
+                                                DatasetDocument.enabled.is_(True),
+                                                DatasetDocument.archived.is_(False),
+                                            ),
+                                            1,
+                                        ),
+                                        else_=0,
+                                    )
+                                ),
+                                0,
+                            ).label("available"),
+                        )
+                        .join(Dataset, Dataset.id == DatasetDocument.dataset_id)
+                        .where(Dataset.tenant_id.in_(selected_tenant_ids))
+                        .group_by(Dataset.tenant_id)
+                    ).all()
+                }
+                if include_segments:
+                    segment_counts_by_tenant = {
+                        row.tenant_id: {"total": int(row.total), "available": int(row.available)}
+                        for row in session.execute(
+                            select(
+                                Dataset.tenant_id,
+                                sa.func.count(DocumentSegment.id).label("total"),
+                                sa.func.coalesce(
+                                    sa.func.sum(
+                                        sa.case(
+                                            (
+                                                sa.and_(
+                                                    DocumentSegment.status == "completed",
+                                                    DocumentSegment.enabled.is_(True),
+                                                ),
+                                                1,
+                                            ),
+                                            else_=0,
+                                        )
+                                    ),
+                                    0,
+                                ).label("available"),
+                            )
+                            .join(Dataset, Dataset.id == DocumentSegment.dataset_id)
+                            .where(Dataset.tenant_id.in_(selected_tenant_ids))
+                            .group_by(Dataset.tenant_id)
+                        ).all()
+                    }
+                    child_chunk_counts_by_tenant = {
+                        row.tenant_id: int(row.total)
+                        for row in session.execute(
+                            select(Dataset.tenant_id, sa.func.count(ChildChunk.id).label("total"))
+                            .join(Dataset, Dataset.id == ChildChunk.dataset_id)
+                            .where(Dataset.tenant_id.in_(selected_tenant_ids))
+                            .group_by(Dataset.tenant_id)
+                        ).all()
+                    }
+            space_items = [
+                {
+                    "id": tenant.id,
+                    "name": tenant.name,
+                    "plan": tenant.plan,
+                    "status": tenant.status,
+                    "created_at": tenant.created_at,
+                    "updated_at": tenant.updated_at,
+                    "summary": {
+                        "knowledge_bases": dataset_counts.get(tenant.id, 0),
+                        "documents": document_counts.get(tenant.id, {}).get("total", 0),
+                        "available_documents": document_counts.get(tenant.id, {}).get("available", 0),
+                        "segments": segment_counts_by_tenant.get(tenant.id, {}).get("total") if include_segments else None,
+                        "available_segments": (
+                            segment_counts_by_tenant.get(tenant.id, {}).get("available") if include_segments else None
+                        ),
+                        "child_chunks": child_chunk_counts_by_tenant.get(tenant.id, 0) if include_segments else None,
+                    },
+                }
+                for tenant in tenants
+            ]
+            result = {
+                "filters": {
+                    "tenant_ids": list(tenant_ids),
+                    "dataset_ids": [],
+                    "spaces_only": True,
+                    "include_segments": include_segments,
+                },
+                "summary": {"spaces": len(space_items)},
+                "spaces": space_items,
+            }
+            click.echo(json.dumps(_knowledge_inventory_value(result), ensure_ascii=False, indent=2))
+            logger.info("Dify 空间汇总清单生成完成：spaces=%d", len(space_items))
+            return
+
+        dataset_stmt = select(Dataset).order_by(Dataset.created_at.asc(), Dataset.name.asc())
+        if selected_tenant_ids:
+            dataset_stmt = dataset_stmt.where(Dataset.tenant_id.in_(selected_tenant_ids))
+        else:
+            dataset_stmt = dataset_stmt.where(sa.false())
+        if dataset_ids:
+            dataset_stmt = dataset_stmt.where(Dataset.id.in_(dataset_ids))
+        datasets = list(session.scalars(dataset_stmt).all())
+        logger.info("Dify 知识库清单：已读取 %d 个知识库。", len(datasets))
+        selected_dataset_ids = [dataset.id for dataset in datasets]
+
+        documents: list[DatasetDocument] = []
+        if selected_dataset_ids:
+            documents = list(
+                session.scalars(
+                    select(DatasetDocument)
+                    .where(DatasetDocument.dataset_id.in_(selected_dataset_ids))
+                    .order_by(DatasetDocument.dataset_id, DatasetDocument.position, DatasetDocument.created_at)
+                ).all()
+            )
+        logger.info("Dify 知识库清单：已读取 %d 个文档。", len(documents))
+
+        document_ids = [document.id for document in documents]
+        segment_counts: dict[str, dict[str, int]] = {}
+        child_chunk_counts: dict[str, int] = {}
+        if include_segments and document_ids:
+            segment_rows = session.execute(
+                select(
+                    DocumentSegment.document_id,
+                    sa.func.count(DocumentSegment.id).label("total"),
+                    sa.func.coalesce(
+                        sa.func.sum(sa.case((DocumentSegment.enabled.is_(True), 1), else_=0)), 0
+                    ).label("enabled"),
+                    sa.func.coalesce(
+                        sa.func.sum(sa.case((DocumentSegment.status == "completed", 1), else_=0)), 0
+                    ).label("completed"),
+                    sa.func.coalesce(
+                        sa.func.sum(
+                            sa.case(
+                                (
+                                    sa.and_(
+                                        DocumentSegment.status == "completed",
+                                        DocumentSegment.enabled.is_(True),
+                                    ),
+                                    1,
+                                ),
+                                else_=0,
+                            )
+                        ),
+                        0,
+                    ).label("available"),
+                )
+                .where(DocumentSegment.document_id.in_(document_ids))
+                .group_by(DocumentSegment.document_id)
+            ).all()
+            segment_counts = {
+                row.document_id: {
+                    "total": int(row.total),
+                    "enabled": int(row.enabled),
+                    "completed": int(row.completed),
+                    "available": int(row.available),
+                }
+                for row in segment_rows
+            }
+            child_chunk_counts = {
+                row.document_id: int(row.total)
+                for row in session.execute(
+                    select(ChildChunk.document_id, sa.func.count(ChildChunk.id).label("total"))
+                    .where(ChildChunk.document_id.in_(document_ids))
+                    .group_by(ChildChunk.document_id)
+                ).all()
+            }
+            logger.info(
+                "Dify 知识库清单：已聚合 %d 个文档的分段统计及 %d 个文档的子块统计。",
+                len(segment_counts),
+                len(child_chunk_counts),
+            )
+
+        upload_file_ids = [
+            upload_file_id
+            for document in documents
+            if (upload_file_id := _knowledge_inventory_upload_file_id(document))
+        ]
+        upload_files = {}
+        if upload_file_ids:
+            upload_files = {
+                upload_file.id: upload_file
+                for upload_file in session.scalars(select(UploadFile).where(UploadFile.id.in_(upload_file_ids))).all()
+            }
+
+        latest_rules: dict[str, DatasetProcessRule] = {}
+        if selected_dataset_ids:
+            for rule in session.scalars(
+                select(DatasetProcessRule)
+                .where(DatasetProcessRule.dataset_id.in_(selected_dataset_ids))
+                .order_by(DatasetProcessRule.dataset_id, DatasetProcessRule.created_at.desc())
+            ).all():
+                latest_rules.setdefault(rule.dataset_id, rule)
+
+        documents_by_dataset: dict[str, list[DatasetDocument]] = {}
+        for document in documents:
+            documents_by_dataset.setdefault(document.dataset_id, []).append(document)
+        datasets_by_tenant: dict[str, list[Dataset]] = {}
+        for dataset in datasets:
+            datasets_by_tenant.setdefault(dataset.tenant_id, []).append(dataset)
+
+        all_document_count = 0
+        all_segment_count = 0
+        all_child_chunk_count = 0
+        tenant_items = []
+        for tenant in tenants:
+            knowledge_bases = []
+            tenant_documents = 0
+            tenant_segments = 0
+            tenant_child_chunks = 0
+            for dataset in datasets_by_tenant.get(tenant.id, []):
+                dataset_documents = documents_by_dataset.get(dataset.id, [])
+                dataset_segment_count = sum(segment_counts.get(document.id, {}).get("total", 0) for document in dataset_documents)
+                dataset_available_segment_count = sum(
+                    segment_counts.get(document.id, {}).get("available", 0) for document in dataset_documents
+                )
+                dataset_child_chunk_count = sum(child_chunk_counts.get(document.id, 0) for document in dataset_documents)
+                rule = latest_rules.get(dataset.id)
+                knowledge_base = {
+                    "id": dataset.id,
+                    "name": dataset.name,
+                    "description": dataset.description,
+                    "provider": dataset.provider,
+                    "permission": dataset.permission,
+                    "data_source_type": dataset.data_source_type,
+                    "indexing_technique": dataset.indexing_technique,
+                    "index_struct": dataset.index_struct_dict,
+                    "embedding_model": dataset.embedding_model,
+                    "embedding_model_provider": dataset.embedding_model_provider,
+                    "keyword_number": dataset.keyword_number,
+                    "retrieval_model": dataset.retrieval_model,
+                    "built_in_field_enabled": dataset.built_in_field_enabled,
+                    "runtime_mode": dataset.runtime_mode,
+                    "pipeline_id": dataset.pipeline_id,
+                    "chunk_structure": dataset.chunk_structure,
+                    "enable_api": dataset.enable_api,
+                    "created_by": dataset.created_by,
+                    "created_at": dataset.created_at,
+                    "updated_by": dataset.updated_by,
+                    "updated_at": dataset.updated_at,
+                    "latest_process_rule": (
+                        {
+                            "id": rule.id,
+                            "mode": rule.mode,
+                            "rules": rule.rules_dict,
+                            "created_by": rule.created_by,
+                            "created_at": rule.created_at,
+                        }
+                        if rule
+                        else None
+                    ),
+                    "summary": {
+                        "documents": len(dataset_documents),
+                        "available_documents": sum(
+                            1
+                            for document in dataset_documents
+                            if document.indexing_status == "completed" and document.enabled and not document.archived
+                        ),
+                        "word_count": _knowledge_inventory_count(dataset_documents, "word_count"),
+                        "segments": dataset_segment_count if include_segments else None,
+                        "available_segments": dataset_available_segment_count if include_segments else None,
+                        "child_chunks": dataset_child_chunk_count if include_segments else None,
+                    },
+                }
+                if not summary_only:
+                    knowledge_base["documents"] = []
+                    for document in dataset_documents:
+                        source_file_id = _knowledge_inventory_upload_file_id(document)
+                        upload_file = upload_files.get(source_file_id)
+                        document_item = {
+                            "id": document.id,
+                            "name": document.name,
+                            "position": document.position,
+                            "data_source_type": document.data_source_type,
+                            "data_source_info": document.data_source_info_dict,
+                            "dataset_process_rule_id": document.dataset_process_rule_id,
+                            "batch": document.batch,
+                            "created_from": document.created_from,
+                            "created_by": document.created_by,
+                            "created_api_request_id": document.created_api_request_id,
+                            "file_id": document.file_id,
+                            "source_file_id": source_file_id,
+                            "file": (
+                                {
+                                    "id": upload_file.id,
+                                    "name": upload_file.name,
+                                    "size": upload_file.size,
+                                    "extension": upload_file.extension,
+                                    "mime_type": upload_file.mime_type,
+                                    "storage_type": upload_file.storage_type,
+                                    "created_at": upload_file.created_at,
+                                }
+                                if upload_file
+                                else None
+                            ),
+                            "word_count": document.word_count,
+                            "tokens": document.tokens,
+                            "indexing_status": document.indexing_status,
+                            "display_status": document.display_status,
+                            "indexing_latency": document.indexing_latency,
+                            "enabled": document.enabled,
+                            "disabled_at": document.disabled_at,
+                            "archived": document.archived,
+                            "archived_reason": document.archived_reason,
+                            "archived_at": document.archived_at,
+                            "is_paused": document.is_paused,
+                            "paused_at": document.paused_at,
+                            "error": document.error,
+                            "doc_type": document.doc_type,
+                            "doc_form": document.doc_form,
+                            "doc_language": document.doc_language,
+                            "doc_metadata": document.doc_metadata,
+                            "created_at": document.created_at,
+                            "updated_at": document.updated_at,
+                            "processing_started_at": document.processing_started_at,
+                            "parsing_completed_at": document.parsing_completed_at,
+                            "cleaning_completed_at": document.cleaning_completed_at,
+                            "splitting_completed_at": document.splitting_completed_at,
+                            "completed_at": document.completed_at,
+                            "stopped_at": document.stopped_at,
+                        }
+                        if include_segments:
+                            document_item["segments"] = {
+                                **segment_counts.get(
+                                    document.id,
+                                    {"total": 0, "enabled": 0, "completed": 0, "available": 0},
+                                ),
+                                "child_chunks": child_chunk_counts.get(document.id, 0),
+                            }
+                        knowledge_base["documents"].append(document_item)
+                knowledge_bases.append(knowledge_base)
+                tenant_documents += len(dataset_documents)
+                tenant_segments += dataset_segment_count
+                tenant_child_chunks += dataset_child_chunk_count
+
+            all_document_count += tenant_documents
+            all_segment_count += tenant_segments
+            all_child_chunk_count += tenant_child_chunks
+            tenant_items.append(
+                {
+                    "id": tenant.id,
+                    "name": tenant.name,
+                    "plan": tenant.plan,
+                    "status": tenant.status,
+                    "created_at": tenant.created_at,
+                    "updated_at": tenant.updated_at,
+                    "summary": {
+                        "knowledge_bases": len(knowledge_bases),
+                        "documents": tenant_documents,
+                        "segments": tenant_segments if include_segments else None,
+                        "child_chunks": tenant_child_chunks if include_segments else None,
+                    },
+                    "knowledge_bases": knowledge_bases,
+                }
+            )
+
+        result = {
+            "filters": {
+                "tenant_ids": list(tenant_ids),
+                "dataset_ids": list(dataset_ids),
+                "spaces_only": False,
+                "summary_only": summary_only,
+                "include_segments": include_segments,
+            },
+            "summary": {
+                "spaces": len(tenant_items),
+                "knowledge_bases": len(datasets),
+                "documents": all_document_count,
+                "segments": all_segment_count if include_segments else None,
+                "child_chunks": all_child_chunk_count if include_segments else None,
+            },
+            "spaces": tenant_items,
+        }
+        click.echo(json.dumps(_knowledge_inventory_value(result), ensure_ascii=False, indent=2))
+        logger.info("Dify 知识库清单生成完成：%s", result["summary"])
+    finally:
+        session.close()
+
+
+def _run_dify_knowledge_migration(studio_manager_url: str, studio_manager_api_key: str, tenant_id: str,
+                                  dataset_ids: tuple[str, ...], excluded_dataset_ids: tuple[str, ...],
+                                  strategy: str, force: bool, **setting_options: str | None) -> None:
+    """在独立事务中运行知识库迁移，进度由 DatasetMigrationProgress 持久化。"""
+    settings = MigrationSettings.from_options(**setting_options)
+    logger.info(
+        "执行 Dify 知识库迁移命令：strategy=%s tenant_id=%s project_id=%s workspace_id=%s manager_url=%s",
+        strategy, tenant_id, settings.project_id, settings.workspace_id, studio_manager_url,
+    )
+    # 迁移器以每个知识库/文档为粒度提交进度。不能使用 begin() 上下文，
+    # 否则第一次 commit() 后该上下文的事务会关闭，后续失败状态无法落库。
+    session = sessionmaker(db.engine, expire_on_commit=False)()
+    try:
+        client = StudioManagerClient(studio_manager_url, studio_manager_api_key, settings)
+        migrator = DifyKnowledgeMigrator(session, client, settings, tenant_id, strategy, force)
+        result = migrator.migrate(dataset_ids, excluded_dataset_ids)
+    finally:
+        session.close()
+    logger.info("Dify 知识库迁移命令完成：strategy=%s result=%s", strategy, result)
+    click.echo(json.dumps(result, ensure_ascii=False))
+
+
+def _dify_migration_options(command):
+    command = click.option("--studio-manager-url", "--studio-manager-ip", required=True)(command)
+    command = click.option("--studio-manager-api-key", "--api-key", required=True)(command)
+    command = click.option("--project-id", required=True)(command)
+    command = click.option("--workspace-id", required=True)(command)
+    command = click.option("--instance-id", default="dify-1.9.1", show_default=True)(command)
+    command = click.option("--tenant-id", required=True)(command)
+    command = click.option("--dataset-id", "dataset_ids", multiple=True)(command)
+    command = click.option("--exclude-dataset-id", "excluded_dataset_ids", multiple=True)(command)
+    return click.option("--force", is_flag=True, default=False)(command)
+
+
+@click.command("migrate-dify-kb-source-files", help="迁移 Dify 原文件，使用 Studio 通用/父子分段重新解析。")
+@_dify_migration_options
+def migrate_dify_kb_source_files(studio_manager_url, studio_manager_api_key, tenant_id,
+                                  dataset_ids, excluded_dataset_ids, force, **setting_options):
+    _run_dify_knowledge_migration(studio_manager_url, studio_manager_api_key, tenant_id,
+                                  dataset_ids, excluded_dataset_ids, "source_file", force, **setting_options)
+
+
+@click.command("migrate-dify-kb-segments", help="迁移 Dify 原文件及已完成分段，目标仅执行索引。")
+@_dify_migration_options
+def migrate_dify_kb_segments(studio_manager_url, studio_manager_api_key, tenant_id,
+                              dataset_ids, excluded_dataset_ids, force, **setting_options):
+    _run_dify_knowledge_migration(studio_manager_url, studio_manager_api_key, tenant_id,
+                                  dataset_ids, excluded_dataset_ids, "segments", force, **setting_options)
 
 
 @click.command("reset-password", help="Reset the account password.")

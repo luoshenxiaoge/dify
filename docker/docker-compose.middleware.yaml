@@ -179,6 +179,29 @@ services:
       - ssrf_proxy_network
       - default
 
+  # The pgvector vector database.
+  pgvector:
+    image: pgvector/pgvector:pg16
+    profiles:
+      - pgvector
+    restart: always
+    env_file:
+      - ./middleware.env
+    environment:
+      POSTGRES_USER: ${PGVECTOR_PGUSER:-postgres}
+      POSTGRES_PASSWORD: ${PGVECTOR_POSTGRES_PASSWORD:-difyai123456}
+      POSTGRES_DB: ${PGVECTOR_POSTGRES_DB:-dify}
+      PGDATA: /var/lib/postgresql/data/pgdata
+    volumes:
+      - ./volumes/pgvector/data:/var/lib/postgresql/data
+    ports:
+      - "${EXPOSE_PGVECTOR_PORT:-5434}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGVECTOR_PGUSER:-postgres} -d ${PGVECTOR_POSTGRES_DB:-dify}"]
+      interval: 1s
+      timeout: 3s
+      retries: 30
+
   # The Weaviate vector store.
   weaviate:
     image: semitechnologies/weaviate:1.19.0

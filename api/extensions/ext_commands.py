@@ -14,6 +14,7 @@ def init_app(app: DifyApp):
         fix_app_site_missing,
         install_plugins,
         install_rag_pipeline_plugins,
+        list_dify_knowledge_inventory,
         migrate_data_for_plugin,
         migrate_oss,
         old_metadata_migration,
@@ -24,6 +25,8 @@ def init_app(app: DifyApp):
         setup_datasource_oauth_client,
         setup_system_tool_oauth_client,
         transform_datasource_credentials,
+        migrate_dify_kb_source_files,
+        migrate_dify_kb_segments,
         upgrade_db,
         vdb_migrate,
     )
@@ -52,6 +55,9 @@ def init_app(app: DifyApp):
         setup_datasource_oauth_client,
         transform_datasource_credentials,
         install_rag_pipeline_plugins,
+        list_dify_knowledge_inventory,
+        migrate_dify_kb_source_files,
+        migrate_dify_kb_segments,
     ]
     for cmd in cmds_to_register:
         app.cli.add_command(cmd)

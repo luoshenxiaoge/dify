@@ -1,0 +1,14 @@
+# 本机 Dify 到 Studio 知识库迁移配置；调用地址与 API Key 必须由命令行传入。
+studio_manager:
+  project_id: "0"
+  workspace_id: "52a8a0e01a314c8fa69e9308bcd1defa"
+  embedding_model:
+    type: embedding
+    name: text-embedding-v4
+    id: "3b97a35a-0325-49b0-81a9-2818d7c76b68"
+  rerank_model:
+    type: rerank
+    name: qwen3-rerank
+    id: "b751ebb7-e534-4166-b8d1-039e35211b73"
+source:
+  instance_id: dify-1.9.1-local
