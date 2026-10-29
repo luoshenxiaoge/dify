@@ -575,7 +575,7 @@ def migrate_dify_kb_source_files(studio_manager_url, studio_manager_api_key, ten
                                   dataset_ids, excluded_dataset_ids, "source_file", force, **setting_options)
 
 
-@click.command("migrate-dify-kb-segments", help="迁移 Dify 原文件及已完成分段，目标仅执行索引。")
+@click.command("migrate-dify-kb-segments", help="迁移 Dify 已完成分段及文件；源文件缺失时生成 TXT，目标仅执行索引。")
 @_dify_migration_options
 def migrate_dify_kb_segments(studio_manager_url, studio_manager_api_key, tenant_id,
                               dataset_ids, excluded_dataset_ids, force, **setting_options):
