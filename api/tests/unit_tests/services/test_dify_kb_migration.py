@@ -4,6 +4,7 @@ from unittest.mock import Mock
 
 import pytest
 from opendal.exceptions import NotFound
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
 from models.dataset import Dataset, Document
@@ -54,8 +55,145 @@ def test_existing_source_preserves_original_bytes(migrator, document, segments, 
 
     upload, content = migrator._source_file(document, segments)
 
-    assert (upload.name, upload.mime_type, content) == (upload_file.name, upload_file.mime_type, b"original bytes")
+    assert (upload.name, upload.mime_type, content) == (document.name, upload_file.mime_type, b"original bytes")
     assert not upload.reconstructed_from_segments
+    assert upload.original_name == upload_file.name
+
+
+def test_document_name_without_extension_keeps_source_format(migrator, document, segments, upload_file):
+    document.name = "用户重命名后的文档"
+    document.file_id = "upload-test"
+    migrator.db.get.return_value = upload_file
+    migration.storage.load_once.return_value = b"original bytes"
+    upload, _ = migrator._source_file(document, segments)
+    assert upload.name == document.name
+    assert upload.original_name == "原始文档.docx"
+
+
+@pytest.mark.parametrize("strategy", ["source_file", "segments"])
+def test_client_sends_document_name_separately_from_physical_file(strategy):
+    session = Mock()
+    session.post.return_value.ok = True
+    session.post.return_value.json.return_value = {"file_id": "target-file"}
+    client = migration.StudioManagerClient("http://manager", "key", migration.MigrationSettings("0", "ws"))
+    client.session = session
+    payload = {"strategy": strategy, "document_name": "逻辑名称", "source_file_name": "原文件.docx"}
+    client.import_document("kb", payload, "逻辑名称", b"content", "application/test")
+    files = session.post.call_args.kwargs["files"]
+    assert files["file"][0] == "原文件.docx"
+    if strategy == "source_file":
+        assert files["document_name"][1] == "逻辑名称"
+
+
+def test_parent_child_configuration_preserves_overlap(migrator):
+    rule = SimpleNamespace(
+        mode="hierarchical",
+        rules_dict={
+            "segmentation": {"max_tokens": 50, "chunk_overlap": 50, "separator": "@@"},
+            "subchunk_segmentation": {"max_tokens": 4000, "chunk_overlap": 25, "separator": "##"},
+        },
+    )
+    dataset = SimpleNamespace(latest_process_rule=rule, retrieval_model={}, name="test", description="test")
+    split = migrator._knowledge_payload(dataset, [])["split_conf"]
+    assert split["parent_max_tokens"] == 50
+    assert split["child_max_tokens"] == 4000
+    assert split["parent_chunk_overlap"] == 50
+    assert split["child_chunk_overlap"] == 25
+
+
+@pytest.mark.parametrize("strategy", ["source_file", "segments"])
+@pytest.mark.parametrize(
+    ("extract_type", "ocr_enabled"),
+    [
+        ("default", False),
+        ("ocr_parse", True),
+        ("enhanced", True),
+        ("ocr_parse_all_word", True),
+        (None, False),
+        ("", False),
+    ],
+)
+def test_migrated_knowledge_maps_source_extract_type(migrator, strategy, extract_type, ocr_enabled):
+    migrator.strategy = strategy
+    dataset = SimpleNamespace(
+        latest_process_rule=None, retrieval_model={}, name="OCR迁移", description="", extract_type=extract_type
+    )
+    payload = migrator._knowledge_payload(dataset, [])
+    assert payload["parse_conf"]["ocr_enabled"] is ocr_enabled
+    assert payload["parse_conf"]["image_enabled"] is False
+
+
+@pytest.mark.parametrize("strategy", ["source_file", "segments"])
+def test_legacy_dataset_without_extract_type_uses_normal_parsing(migrator, strategy):
+    migrator.strategy = strategy
+    dataset = SimpleNamespace(latest_process_rule=None, retrieval_model={}, name="旧知识库", description="")
+    payload = migrator._knowledge_payload(dataset, [])
+    assert payload["parse_conf"]["ocr_enabled"] is False
+    assert payload["parse_conf"]["image_enabled"] is False
+
+
+@pytest.mark.parametrize(("retrieval", "expected"), [(None, 2), ({}, 2), ({"top_k": 7}, 7)])
+def test_migration_preserves_top_k_or_uses_production_dataset_default(migrator, retrieval, expected):
+    dataset = SimpleNamespace(latest_process_rule=None, retrieval_model=retrieval, name="test", description="")
+    assert migrator._knowledge_payload(dataset, [])["top_k"] == expected
+
+
+@pytest.mark.parametrize("extract_type", ["default", "ocr_parse", "enhanced", "ocr_parse_all_word", None, ""])
+def test_reads_production_extract_type_not_mapped_by_local_orm(migrator, extract_type):
+    engine = create_engine("sqlite://")
+    with engine.begin() as connection:
+        connection.execute(text("CREATE TABLE datasets (id TEXT PRIMARY KEY, extract_type TEXT)"))
+        connection.execute(
+            text("INSERT INTO datasets (id, extract_type) VALUES (:id, :extract_type)"),
+            {"id": "source", "extract_type": extract_type},
+        )
+    try:
+        with Session(engine) as session:
+            migrator.db = session
+            dataset = SimpleNamespace(
+                id="source", latest_process_rule=None, retrieval_model={}, name="test", description=""
+            )
+            payload = migrator._knowledge_payload(dataset, [], extract_type=migrator._source_extract_type(dataset))
+            assert payload["parse_conf"]["ocr_enabled"] is (extract_type not in (None, "", "default"))
+    finally:
+        engine.dispose()
+
+
+def test_database_without_extract_type_column_uses_normal_parsing(migrator):
+    engine = create_engine("sqlite://")
+    with engine.begin() as connection:
+        connection.execute(text("CREATE TABLE datasets (id TEXT PRIMARY KEY)"))
+    try:
+        with Session(engine) as session:
+            migrator.db = session
+            assert migrator._source_extract_type(SimpleNamespace(id="legacy")) == "default"
+    finally:
+        engine.dispose()
+
+
+def test_mapped_extract_type_does_not_require_schema_lookup(migrator):
+    assert migrator._source_extract_type(SimpleNamespace(extract_type="enhanced")) == "enhanced"
+    migrator.db.connection.assert_not_called()
+
+
+def test_new_target_knowledge_uses_database_extract_type(migrator, monkeypatch):
+    progress = SimpleNamespace(
+        status="RUNNING",
+        target_knowledge_repo_id=None,
+        last_success_document_id=None,
+        succeeded_documents=0,
+        total_documents=0,
+        completed_at=None,
+    )
+    monkeypatch.setattr(migrator, "_progress", Mock(return_value=progress))
+    read_type = Mock(return_value="ocr_parse_all_word")
+    monkeypatch.setattr(migrator, "_source_extract_type", read_type)
+    migrator.db.query.return_value.filter.return_value.order_by.return_value.all.return_value = []
+    dataset = SimpleNamespace(id="source", latest_process_rule=None, retrieval_model={}, name="test", description="")
+
+    assert migrator._migrate_dataset(dataset) == 0
+    read_type.assert_called_once_with(dataset)
+    assert migrator.client.create_knowledge.call_args.args[0]["parse_conf"]["ocr_enabled"] is True
 
 
 @pytest.mark.parametrize("missing", ["record", "blob", "file_race", "opendal_race"])
@@ -161,4 +299,53 @@ def test_segments_submission_keeps_original_segments_checksum_and_identity(migra
     assert mime_type == "text/plain"
     assert progress.last_success_document_id == document.id
     assert progress.status == "SUCCEEDED"
+    filters = migrator.db.query.return_value.filter.call_args.args
+    assert any(getattr(condition.left, "name", None) == "enabled" for condition in filters)
     read_segments.assert_called_once_with(document)
+
+
+def test_migration_uses_dataset_models_and_default_qa_model():
+    from core.model_runtime.entities.model_entities import ModelType
+    from services.dify_kb_migration import DifyKnowledgeMigrator
+
+    model_manager = Mock()
+    model_manager.get_model_instance.side_effect = lambda **kwargs: SimpleNamespace(
+        provider=kwargs["provider"],
+        model=kwargs["model"],
+        invoke_text_embedding=Mock(return_value=SimpleNamespace(embeddings=[[0.1, 0.2, 0.3]])),
+        credentials={"endpoint_url": "https://models.example/v1", "api_key": "test-key"},
+    )
+    model_manager.get_default_model_instance.return_value = SimpleNamespace(
+        provider="langgenius/openai_api_compatible/openai_api_compatible",
+        model="default-llm",
+        credentials={"endpoint_url": "https://models.example/v1", "api_key": "test-key"},
+    )
+    dataset = SimpleNamespace(
+        embedding_model_provider="custom/provider",
+        embedding_model="selected-embedding",
+        retrieval_model={
+            "reranking_enable": False,
+            "reranking_model": {
+                "reranking_provider_name": "custom/provider",
+                "reranking_model_name": "selected-rerank",
+            },
+        },
+    )
+    client = Mock()
+    client.ensure_model.side_effect = lambda model: {"id": model["model_name"] + "-id", "name": model["model_name"]}
+    migrator = DifyKnowledgeMigrator(
+        Mock(), client, migration.MigrationSettings("0", "workspace"), "tenant", "source_file"
+    )
+    payload = {"split_conf": {"qa_enabled": True}, "rerank_enabled": False}
+    migrator._attach_source_models(dataset, payload, model_manager=model_manager)
+
+    assert payload["embedding_model"]["id"] == "selected-embedding-id"
+    assert payload["rerank_model"]["id"] == "selected-rerank-id"
+    assert payload["rerank_enabled"] is False
+    assert payload["split_conf"]["qa_model"] == "default-llm"
+    model_manager.get_default_model_instance.assert_called_once_with("tenant", ModelType.LLM)
+    assert [call.args[0]["api_url"] for call in client.ensure_model.call_args_list] == [
+        "https://models.example/v1/embeddings",
+        "https://models.example/v1/rerank",
+        "https://models.example/v1/chat/completions",
+    ]

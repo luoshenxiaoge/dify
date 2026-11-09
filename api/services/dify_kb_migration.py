@@ -16,11 +16,15 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 import requests
 from opendal.exceptions import NotFound
+from sqlalchemy import inspect, text
 from sqlalchemy.orm import Session
 
+from core.model_manager import ModelInstance, ModelManager
+from core.model_runtime.entities.model_entities import ModelType
 from extensions.ext_storage import storage
 from models.dataset import ChildChunk, Dataset, Document, DocumentSegment
 from models.dataset_migration import DatasetMigrationProgress
@@ -38,6 +42,7 @@ class MigrationSourceFile:
     name: str
     mime_type: str
     reconstructed_from_segments: bool = False
+    original_name: str | None = None
 
 
 @dataclass(frozen=True)
@@ -53,12 +58,7 @@ class MigrationSettings:
         workspace_id: str,
         instance_id: str,
     ) -> MigrationSettings:
-        """从本次 CLI 显式参数构造目标 Studio 迁移范围。
-
-        模型配置不由 Dify 传入。Studio Manager 会在目标 project/workspace
-        内选择当前可用的 embedding、rerank、Q&A 模型，并向知识库服务同步
-        完整的调用配置，避免 Dify 保存或暴露 Studio 模型标识。
-        """
+        """从本次 CLI 显式参数构造目标 Studio 迁移范围。"""
         if not project_id or not workspace_id:
             raise MigrationError("迁移参数缺少 --project-id 或 --workspace-id")
         return cls(
@@ -92,6 +92,32 @@ class StudioManagerClient:
             raise MigrationError(f"Studio Manager 请求失败：HTTP {response.status_code}，{body}")
         return body.get("data", body)
 
+    def ensure_model(self, payload: dict[str, object]) -> dict[str, str]:
+        response = self.session.post(
+            self._url(f"/knowledges/dify-models:ensure?workspace_id={self.settings.workspace_id}"),
+            json=payload,
+            timeout=60,
+        )
+        # 避免代理或参数错误响应回显凭据；仅保留错误码。
+        try:
+            body = response.json()
+        except ValueError:
+            body = {}
+        if not isinstance(body, dict):
+            body = {}
+        data = body.get("data", body)
+        if (
+            not response.ok
+            or body.get("error_code")
+            or not isinstance(data, dict)
+            or not data.get("id")
+            or not data.get("name")
+        ):
+            code = str(body.get("error_code", ""))
+            safe_code = code if re.fullmatch(r"openjiuwen\.\d+", code) else "unknown"
+            raise MigrationError(f"Studio 模型注册失败：HTTP {response.status_code}，错误码 {safe_code}")
+        return {"id": str(data["id"]), "name": str(data["name"])}
+
     def create_knowledge(self, payload: dict[str, Any]) -> str:
         response = self.session.post(
             self._url(f"/knowledges?workspace_id={self.settings.workspace_id}"),
@@ -110,9 +136,12 @@ class StudioManagerClient:
         suffix = f"/knowledges/{knowledge_repo_id}/migrations/dify/documents:"
         strategy = payload["strategy"]
         endpoint = "upload" if strategy == "source_file" else "import"
-        files: dict[str, Any] = {"file": (file_name, file_bytes, mime_type or "application/octet-stream")}
+        upload_name = str(payload.get("source_file_name") or file_name)
+        files: dict[str, Any] = {"file": (upload_name, file_bytes, mime_type or "application/octet-stream")}
         if strategy == "segments":
             files["payload"] = (None, json.dumps(payload, ensure_ascii=False), "application/json")
+        else:
+            files["document_name"] = (None, str(payload.get("document_name") or file_name))
         response = self.session.post(
             self._url(f"{suffix}{endpoint}?workspace_id={self.settings.workspace_id}"),
             files=files,
@@ -141,6 +170,8 @@ class DifyKnowledgeMigrator:
         self.tenant_id = tenant_id
         self.strategy = strategy
         self.force = force
+        self._has_source_extract_type: bool | None = None
+        self._source_model_refs: dict[tuple[ModelType, str, str], dict[str, str]] = {}
         self.fingerprint = hashlib.sha256(
             f"{strategy}|{settings.project_id}|{settings.workspace_id}|{settings.instance_id}".encode()
         ).hexdigest()
@@ -271,7 +302,23 @@ class DifyKnowledgeMigrator:
             normalized = "difyknowledge"
         return normalized[:50]
 
-    def _knowledge_payload(self, dataset: Dataset, documents: list[Document]) -> dict[str, Any]:
+    def _source_extract_type(self, dataset: Dataset) -> str:
+        """兼容生产新增列，读取时不要求本地 ORM 或旧版数据库增加字段。"""
+        if hasattr(dataset, "extract_type"):
+            return str(getattr(dataset, "extract_type", None) or "default")
+        if self._has_source_extract_type is None:
+            columns = inspect(self.db.connection()).get_columns(Dataset.__tablename__)
+            self._has_source_extract_type = any(column["name"] == "extract_type" for column in columns)
+        if not self._has_source_extract_type:
+            return "default"
+        value = self.db.execute(
+            text("SELECT extract_type FROM datasets WHERE id = :dataset_id"), {"dataset_id": dataset.id}
+        ).scalar_one_or_none()
+        return str(value or "default")
+
+    def _knowledge_payload(
+        self, dataset: Dataset, documents: list[Document], *, extract_type: str | None = None
+    ) -> dict[str, Any]:
         process_rule = dataset.latest_process_rule
         mode = process_rule.mode if process_rule else "automatic"
         rules = process_rule.rules_dict if process_rule and process_rule.rules_dict else {}
@@ -294,8 +341,10 @@ class DifyKnowledgeMigrator:
                 "dify_compatible": True,
                 "parent_mode": rules.get("parent_mode", "paragraph"),
                 "parent_max_tokens": int(segmentation.get("max_tokens", 1024)),
+                "parent_chunk_overlap": int(segmentation.get("chunk_overlap", 0)),
                 "parent_delimiter": separator,
                 "child_max_tokens": int(child.get("max_tokens", 512)),
+                "child_chunk_overlap": int(child.get("chunk_overlap", 0)),
                 "child_delimiter": child.get("separator", child.get("delimiter", "\n")),
                 "remove_extra_spaces": remove_spaces,
                 "remove_urls_emails": remove_urls,
@@ -333,11 +382,14 @@ class DifyKnowledgeMigrator:
         }.get(str(retrieval.get("search_method") or ""), "vector")
         display_name = self._studio_display_name(dataset)
         description = (dataset.description or dataset.name or "Dify knowledge base").strip()[:100]
+        # 生产 datasets.extract_type：default 为普通解析，其余解析类型统一映射到 Studio OCR。
+        # 兼容未增加该字段的 Dify 版本，以及尚未填充解析类型的旧数据。
+        extract_type = extract_type or getattr(dataset, "extract_type", None) or "default"
         return {
             "display_name": display_name,
             "description": description,
             "parse_conf": {
-                "ocr_enabled": False,
+                "ocr_enabled": extract_type != "default",
                 "image_enabled": False,
                 "header_footer_enabled": False,
                 "catalog_enabled": False,
@@ -346,10 +398,138 @@ class DifyKnowledgeMigrator:
             "retrieval_mode": retrieval_mode,
             # Dify 的默认检索模型会将这两个字段持久化为 null；Studio 接口
             # 需要明确的数值，按 Dify 默认值归一化。
-            "top_k": int(retrieval.get("top_k") or 5),
+            # 与生产 Dataset.retrieval_model_dict 的普通知识库默认值一致。
+            "top_k": int(retrieval.get("top_k") or 2),
             "score_threshold": float(retrieval.get("score_threshold") or 0),
             "rerank_enabled": bool(retrieval.get("reranking_enable", False)),
         }
+
+    @staticmethod
+    def _model_endpoint(instance: ModelInstance, model_type: ModelType) -> tuple[str, str]:
+        credentials = instance.credentials
+        provider = instance.provider.rsplit("/", 1)[-1]
+        api_key = str(
+            credentials.get("api_key")
+            or credentials.get("openai_api_key")
+            or credentials.get("dashscope_api_key")
+            or ""
+        )
+        base = (
+            str(
+                credentials.get("endpoint_url")
+                or credentials.get("openai_api_base")
+                or credentials.get("base_url")
+                or credentials.get("api_base")
+                or ""
+            )
+            .strip()
+            .rstrip("/")
+        )
+        suffix = {
+            ModelType.TEXT_EMBEDDING: "/embeddings",
+            ModelType.RERANK: "/rerank",
+            ModelType.LLM: "/chat/completions",
+        }[model_type]
+        rerank_endpoint = str(credentials.get("rerank_endpoint_url") or "").strip().rstrip("/")
+        if model_type == ModelType.RERANK and rerank_endpoint:
+            base, suffix = rerank_endpoint, ""
+        elif not base and provider == "tongyi":
+            host = str(credentials.get("api_host") or "").strip().rstrip("/").removesuffix("/api/v1")
+            if not host:
+                international = str(credentials.get("use_international_endpoint", "")).lower() == "true"
+                host = "https://dashscope-intl.aliyuncs.com" if international else "https://dashscope.aliyuncs.com"
+            if model_type == ModelType.RERANK:
+                base, suffix = host + "/compatible-api/v1", "/reranks"
+            else:
+                base = host + "/compatible-mode/v1"
+        elif not base and provider == "openai" and model_type != ModelType.RERANK:
+            base = "https://api.openai.com/v1"
+        endpoint = (
+            base
+            if not suffix or base.endswith((suffix, "/reranks" if model_type == ModelType.RERANK else suffix))
+            else base + suffix
+        )
+        parsed = urlsplit(endpoint)
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.hostname
+            or parsed.username
+            or parsed.query
+            or parsed.fragment
+        ):
+            raise MigrationError(f"Dify {model_type.value} 模型没有可迁移的 HTTP 调用地址，请检查供应商配置")
+        return endpoint, api_key
+
+    def _attach_source_models(
+        self, dataset: Dataset, payload: dict[str, Any], *, model_manager: ModelManager | None = None
+    ) -> None:
+        retrieval = dataset.retrieval_model or {}
+        rerank = retrieval.get("reranking_model") or {}
+        selections = (
+            (
+                ModelType.TEXT_EMBEDDING,
+                getattr(dataset, "embedding_model_provider", None),
+                getattr(dataset, "embedding_model", None),
+                "embedding_model",
+                "embedding",
+            ),
+            (
+                ModelType.RERANK,
+                rerank.get("reranking_provider_name"),
+                rerank.get("reranking_model_name"),
+                "rerank_model",
+                "rerank",
+            ),
+        )
+        manager = model_manager or ModelManager()
+        for model_type, provider, name, field, ref_type in selections:
+            if not provider and not name:
+                continue
+            if not provider or not name:
+                raise MigrationError(f"Dify {model_type.value} 模型的供应商或名称缺失")
+            ref = self._ensure_source_model(manager, model_type, str(provider), str(name))
+            payload[field] = {"type": ref_type, **ref}
+        if payload["split_conf"].get("qa_enabled"):
+            ref = self._ensure_source_model(manager, ModelType.LLM, "", "")
+            payload["split_conf"]["qa_model"] = ref["name"]
+
+    def _ensure_source_model(
+        self, manager: ModelManager, model_type: ModelType, provider: str, name: str
+    ) -> dict[str, str]:
+        identity = (model_type, provider, name)
+        if identity in self._source_model_refs:
+            return self._source_model_refs[identity]
+        try:
+            instance = (
+                manager.get_model_instance(
+                    tenant_id=self.tenant_id, provider=provider, model_type=model_type, model=name
+                )
+                if provider
+                else manager.get_default_model_instance(self.tenant_id, model_type)
+            )
+            endpoint, api_key = self._model_endpoint(instance, model_type)
+            model_name = str(instance.credentials.get("endpoint_model_name") or instance.model)
+            config: dict[str, object] = {
+                "provider": instance.provider,
+                "model_name": model_name,
+                "model_type": model_type.value,
+                "api_url": endpoint,
+                "api_key": api_key,
+            }
+            if model_type == ModelType.TEXT_EMBEDDING:
+                result = instance.invoke_text_embedding(["Studio model migration"], user=self.tenant_id)
+                if not result.embeddings or not result.embeddings[0]:
+                    raise MigrationError("Dify Embedding 模型未返回可用向量，无法确定维度")
+                config["dimension"] = len(result.embeddings[0])
+        except MigrationError:
+            raise
+        except Exception as exc:
+            label = name if provider else "默认 LLM"
+            # 供应商异常可能包含凭据或完整 HTTP 响应，避免向迁移日志传播。
+            raise MigrationError(f"读取 Dify {model_type.value} 模型 {label} 失败（{type(exc).__name__}）") from None
+        ref = self.client.ensure_model(config)
+        self._source_model_refs[identity] = ref
+        return ref
 
     def _source_file(
         self, document: Document, segments: Sequence[Mapping[str, object]] | None = None
@@ -367,7 +547,9 @@ class DifyKnowledgeMigrator:
                     raise
             else:
                 return MigrationSourceFile(
-                    name=upload_file.name, mime_type=upload_file.mime_type or "application/octet-stream"
+                    name=document.name or upload_file.name,
+                    mime_type=upload_file.mime_type or "application/octet-stream",
+                    original_name=upload_file.name,
                 ), content
         elif self.strategy != "segments":
             raise MigrationError(f"文档 {document.id} 未找到 Dify 上传源文件")
@@ -453,12 +635,14 @@ class DifyKnowledgeMigrator:
                 Document.data_source_type == "upload_file",
                 Document.indexing_status == "completed",
                 Document.archived == False,
+                Document.enabled == True,
             )
             .order_by(Document.position, Document.id)
             .all()
         )
         if not progress.target_knowledge_repo_id:
-            payload = self._knowledge_payload(dataset, documents)
+            payload = self._knowledge_payload(dataset, documents, extract_type=self._source_extract_type(dataset))
+            self._attach_source_models(dataset, payload)
             logger.info(
                 "创建 Studio 知识库：name=%s split_mode=%s retrieval_mode=%s",
                 payload["display_name"],
@@ -509,6 +693,8 @@ class DifyKnowledgeMigrator:
                 source["source_file_reconstructed"] = True
                 source["source_file_original_name"] = document.name
             payload: dict[str, object] = {
+                "document_name": document.name,
+                "source_file_name": upload_file.original_name or upload_file.name,
                 "schema_version": 2,
                 "strategy": self.strategy,
                 "source": source,
