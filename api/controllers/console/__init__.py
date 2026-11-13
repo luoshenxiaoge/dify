@@ -92,6 +92,7 @@ from .datasets import (
     external,
     hit_testing,
     metadata,
+    migration,
     website,
 )
 from .datasets.rag_pipeline import (

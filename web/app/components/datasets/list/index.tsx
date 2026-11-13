@@ -28,7 +28,7 @@ const List = () => {
   const { t } = useTranslation()
   const { systemFeatures } = useGlobalPublicStore()
   const router = useRouter()
-  const { currentWorkspace, isCurrentWorkspaceOwner } = useAppContext()
+  const { currentWorkspace, isCurrentWorkspaceManager, isCurrentWorkspaceOwner } = useAppContext()
   const showTagManagementModal = useTagStore(s => s.showTagManagementModal)
   const { showExternalApiPanel, setShowExternalApiPanel } = useExternalApiPanel()
   const [includeAll, { toggle: toggleIncludeAll }] = useBoolean(false)
@@ -82,6 +82,20 @@ const List = () => {
             onClear={() => handleKeywordsChange('')}
           />
           <div className='h-4 w-[1px] bg-divider-regular' />
+          {isCurrentWorkspaceManager && (
+            <Button onClick={() => {
+              const params = new URLSearchParams()
+              if (includeAll)
+                params.set('include_all', 'true')
+              if (searchKeywords)
+                params.set('source_keyword', searchKeywords)
+              tagIDs.forEach(id => params.append('tag_ids', id))
+              const query = params.toString()
+              router.push(query ? `/datasets/migration?${query}` : '/datasets/migration')
+            }}>
+              {t('dataset.migration.title')}
+            </Button>
+          )}
           <Button
             className='shadows-shadow-xs gap-0.5'
             onClick={() => setShowExternalApiPanel(true)}

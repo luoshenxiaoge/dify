@@ -1,6 +1,7 @@
 import hashlib
+import json
 from types import SimpleNamespace
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 
 import pytest
 from opendal.exceptions import NotFound
@@ -55,34 +56,49 @@ def test_existing_source_preserves_original_bytes(migrator, document, segments, 
 
     upload, content = migrator._source_file(document, segments)
 
-    assert (upload.name, upload.mime_type, content) == (document.name, upload_file.mime_type, b"original bytes")
+    assert (upload.name, upload.mime_type, content) == (upload_file.name, upload_file.mime_type, b"original bytes")
     assert not upload.reconstructed_from_segments
-    assert upload.original_name == upload_file.name
-
-
-def test_document_name_without_extension_keeps_source_format(migrator, document, segments, upload_file):
-    document.name = "用户重命名后的文档"
-    document.file_id = "upload-test"
-    migrator.db.get.return_value = upload_file
-    migration.storage.load_once.return_value = b"original bytes"
-    upload, _ = migrator._source_file(document, segments)
-    assert upload.name == document.name
-    assert upload.original_name == "原始文档.docx"
 
 
 @pytest.mark.parametrize("strategy", ["source_file", "segments"])
-def test_client_sends_document_name_separately_from_physical_file(strategy):
+def test_migration_uses_source_filename_for_upload_and_document_name(
+    migrator, document, segments, upload_file, monkeypatch, strategy
+):
+    migrator.strategy = strategy
+    document.name = "加加加"
+    document.file_id = "upload-test"
+    upload_file.name = "源文件.jpeg"
+    upload_file.mime_type = "image/jpeg"
+    migrator.db.get.return_value = upload_file
+    content = b"\xff\xd8\xfftest"
+    migration.storage.load_once.return_value = content
+    migrator.db.query.return_value.filter.return_value.order_by.return_value.all.return_value = [document]
+    progress = SimpleNamespace(
+        status="RUNNING",
+        target_knowledge_repo_id="kb-target",
+        last_success_document_id=None,
+        succeeded_documents=0,
+    )
+    monkeypatch.setattr(migrator, "_progress", Mock(return_value=progress))
+    monkeypatch.setattr(migrator, "_segments", Mock(return_value=segments))
+
     session = Mock()
     session.post.return_value.ok = True
     session.post.return_value.json.return_value = {"file_id": "target-file"}
     client = migration.StudioManagerClient("http://manager", "key", migration.MigrationSettings("0", "ws"))
     client.session = session
-    payload = {"strategy": strategy, "document_name": "逻辑名称", "source_file_name": "原文件.docx"}
-    client.import_document("kb", payload, "逻辑名称", b"content", "application/test")
+    migrator.client = client
+
+    assert migrator._migrate_dataset(Dataset(id="dataset-test", name="test")) == 1
+
     files = session.post.call_args.kwargs["files"]
-    assert files["file"][0] == "原文件.docx"
+    assert files["file"] == ("源文件.jpeg", content, "image/jpeg")
     if strategy == "source_file":
-        assert files["document_name"][1] == "逻辑名称"
+        assert files["document_name"][1] == "源文件.jpeg"
+    else:
+        payload = json.loads(files["payload"][1])
+        assert payload["document_name"] == "源文件.jpeg"
+        assert payload["segments"] == segments
 
 
 def test_parent_child_configuration_preserves_overlap(migrator):
@@ -296,6 +312,7 @@ def test_segments_submission_keeps_original_segments_checksum_and_identity(migra
     assert payload["idempotency_key"] == hashlib.sha256(identity.encode()).hexdigest()
     assert payload["source"]["source_file_reconstructed"] is True
     assert filename.endswith("-分段重建.txt")
+    assert payload["document_name"] == payload["source_file_name"] == filename
     assert mime_type == "text/plain"
     assert progress.last_success_document_id == document.id
     assert progress.status == "SUCCEEDED"
@@ -304,7 +321,7 @@ def test_segments_submission_keeps_original_segments_checksum_and_identity(migra
     read_segments.assert_called_once_with(document)
 
 
-def test_migration_uses_dataset_models_and_default_qa_model():
+def test_migration_uses_dataset_models_and_default_qa_model(caplog):
     from core.model_runtime.entities.model_entities import ModelType
     from services.dify_kb_migration import DifyKnowledgeMigrator
 
@@ -313,14 +330,23 @@ def test_migration_uses_dataset_models_and_default_qa_model():
         provider=kwargs["provider"],
         model=kwargs["model"],
         invoke_text_embedding=Mock(return_value=SimpleNamespace(embeddings=[[0.1, 0.2, 0.3]])),
-        credentials={"endpoint_url": "https://models.example/v1", "api_key": "test-key"},
+        credentials={
+            "endpoint_url": "https://models.example/v1",
+            "api_key": "test-key",
+            "endpoint_model_name": "upstream-" + kwargs["model"],
+        },
     )
     model_manager.get_default_model_instance.return_value = SimpleNamespace(
         provider="langgenius/openai_api_compatible/openai_api_compatible",
         model="default-llm",
-        credentials={"endpoint_url": "https://models.example/v1", "api_key": "test-key"},
+        credentials={
+            "endpoint_url": "https://models.example/v1",
+            "api_key": "test-key",
+            "endpoint_model_name": "upstream-llm",
+        },
     )
     dataset = SimpleNamespace(
+        id="dataset-test",
         embedding_model_provider="custom/provider",
         embedding_model="selected-embedding",
         retrieval_model={
@@ -333,11 +359,18 @@ def test_migration_uses_dataset_models_and_default_qa_model():
     )
     client = Mock()
     client.ensure_model.side_effect = lambda model: {"id": model["model_name"] + "-id", "name": model["model_name"]}
+    events = Mock()
     migrator = DifyKnowledgeMigrator(
-        Mock(), client, migration.MigrationSettings("0", "workspace"), "tenant", "source_file"
+        Mock(), client, migration.MigrationSettings("0", "workspace"), "tenant", "source_file", on_event=events
     )
     payload = {"split_conf": {"qa_enabled": True}, "rerank_enabled": False}
-    migrator._attach_source_models(dataset, payload, model_manager=model_manager)
+    with caplog.at_level("INFO", logger=migration.__name__):
+        migrator._attach_source_models(dataset, payload, model_manager=model_manager)
+        dataset.id = "next-dataset"
+        migrator._attach_source_models(dataset, payload, model_manager=model_manager)
+        dataset.id = "different-provider"
+        dataset.embedding_model_provider = "different/provider"
+        migrator._attach_source_models(dataset, payload, model_manager=model_manager)
 
     assert payload["embedding_model"]["id"] == "selected-embedding-id"
     assert payload["rerank_model"]["id"] == "selected-rerank-id"
@@ -348,4 +381,65 @@ def test_migration_uses_dataset_models_and_default_qa_model():
         "https://models.example/v1/embeddings",
         "https://models.example/v1/rerank",
         "https://models.example/v1/chat/completions",
+        "https://models.example/v1/embeddings",
     ]
+    models = [
+        {"model_type": "text-embedding", "model_provider": "custom/provider", "model_name": "selected-embedding"},
+        {"model_type": "rerank", "model_provider": "custom/provider", "model_name": "selected-rerank"},
+        {
+            "model_type": "llm",
+            "model_provider": "langgenius/openai_api_compatible/openai_api_compatible",
+            "model_name": "default-llm",
+        },
+    ]
+    assert events.call_args_list == [
+        *[call("model_cache_miss", "dataset-test", model) for model in models],
+        *[call("model_cache_hit", "next-dataset", model) for model in models],
+        call("model_cache_miss", "different-provider", {**models[0], "model_provider": "different/provider"}),
+        *[call("model_cache_hit", "different-provider", model) for model in models[1:]],
+    ]
+    cached_log = (
+        "dataset_id=next-dataset model_type=text-embedding provider=custom/provider model=selected-embedding cache=hit"
+    )
+    assert cached_log in caplog.text
+    assert "test-key" not in caplog.text
+
+
+def test_model_failure_logs_traceback_without_credentials(migrator, caplog):
+    from core.model_runtime.entities.model_entities import ModelType
+    from core.model_runtime.errors.invoke import InvokeBadRequestError
+
+    def invoke_embedding(*args, **kwargs):
+        try:
+            raise ValueError("upstream response with secret-test-token")
+        except ValueError as exc:
+            raise InvokeBadRequestError(
+                "400 Client Error for url: https://models.example/?key=secret-test-token"
+            ) from exc
+
+    model = "Bge-m3-test"
+    provider = "langgenius/openai_api_compatible/openai_api_compatible"
+    manager = Mock()
+    manager.get_model_instance.return_value = SimpleNamespace(
+        provider=provider,
+        model=model,
+        credentials={"endpoint_url": "https://models.example/v1", "api_key": "secret-test-token"},
+        invoke_text_embedding=invoke_embedding,
+    )
+    migrator.on_event = Mock()
+    dataset = Dataset(id="dataset-test")
+
+    with pytest.raises(migration.MigrationError, match="读取 Dify text-embedding 模型 Bge-m3-test 失败") as raised:
+        migrator._ensure_source_model(dataset, manager, ModelType.TEXT_EMBEDDING, provider, model)
+
+    assert "Traceback (most recent call last)" in caplog.text
+    assert "invoke_embedding" in caplog.text
+    assert "InvokeBadRequestError (HTTP 400)" in caplog.text
+    assert "ValueError" in caplog.text
+    assert "secret-test-token" not in caplog.text
+    assert "secret-test-token" not in str(raised.value)
+    migrator.on_event.assert_called_once_with(
+        "model_cache_miss",
+        dataset.id,
+        {"model_type": "text-embedding", "model_provider": provider, "model_name": model},
+    )

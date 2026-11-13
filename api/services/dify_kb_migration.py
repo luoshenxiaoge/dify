@@ -11,7 +11,8 @@ import json
 import logging
 import re
 import time
-from collections.abc import Iterable, Mapping, Sequence
+import traceback
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -20,7 +21,7 @@ from urllib.parse import urlsplit
 
 import requests
 from opendal.exceptions import NotFound
-from sqlalchemy import inspect, text
+from sqlalchemy import Select, inspect, select, text
 from sqlalchemy.orm import Session
 
 from core.model_manager import ModelInstance, ModelManager
@@ -31,10 +32,39 @@ from models.dataset_migration import DatasetMigrationProgress
 from models.model import UploadFile
 
 logger = logging.getLogger(__name__)
+MigrationEvent = Callable[[str, str, dict[str, str | int]], None]
+
+
+def migration_datasets(tenant_id: str) -> Select[tuple[Dataset]]:
+    return (
+        select(Dataset)
+        .where(Dataset.tenant_id == tenant_id, Dataset.indexing_technique == "high_quality")
+        .order_by(Dataset.created_at, Dataset.id)
+    )
 
 
 class MigrationError(RuntimeError):
     """目标 API 或源数据不满足迁移约束。"""
+
+
+def _format_source_model_traceback(error: BaseException) -> str:
+    """记录异常链的调用位置与类型，避免记录供应商响应和凭据。"""
+    traces: list[str] = []
+    seen: set[int] = set()
+    current: BaseException | None = error
+    while current is not None and id(current) not in seen:
+        seen.add(id(current))
+        frames = [
+            f'  File "{frame.f_code.co_filename}", line {line}, in {frame.f_code.co_name}'
+            for frame, line in traceback.walk_tb(current.__traceback__)
+        ]
+        status = re.search(r"\b([45]\d{2}) (?:Client|Server) Error\b", str(current))
+        summary = type(current).__name__
+        if status:
+            summary += f" (HTTP {status[1]})"
+        traces.append("\n".join(["Traceback (most recent call last):", *frames, summary]))
+        current = current.__cause__ or current.__context__
+    return "\nCaused by:\n".join(traces)
 
 
 @dataclass(frozen=True)
@@ -42,7 +72,13 @@ class MigrationSourceFile:
     name: str
     mime_type: str
     reconstructed_from_segments: bool = False
-    original_name: str | None = None
+
+
+@dataclass(frozen=True)
+class CachedSourceModel:
+    provider: str
+    name: str
+    studio_ref: dict[str, str]
 
 
 @dataclass(frozen=True)
@@ -71,23 +107,29 @@ class MigrationSettings:
 class StudioManagerClient:
     """迁移期间唯一允许的 Studio 写入客户端。"""
 
-    def __init__(self, base_url: str, api_key: str, settings: MigrationSettings):
+    def __init__(self, base_url: str, api_key: str, settings: MigrationSettings, *, console: bool = False):
         if not base_url or not api_key:
             raise MigrationError("Studio Manager 地址和知识库 API Key 必须由本次命令显式传入")
         self.base_url = base_url.rstrip("/")
         self.settings = settings
+        self.console = console
         self.session = requests.Session()
         self.session.headers.update({"Authorization": f"Bearer {api_key}"})
 
     def _url(self, suffix: str) -> str:
         return f"{self.base_url}/openapi/v1/{self.settings.project_id}/agent-manager{suffix}"
 
-    @staticmethod
-    def _data(response: requests.Response) -> dict[str, Any]:
+    def _data(self, response: requests.Response) -> dict[str, Any]:
         try:
             body = response.json()
         except ValueError as exc:
             raise MigrationError(f"Studio Manager 返回非 JSON 响应：HTTP {response.status_code}") from exc
+        if self.console and (
+            not 200 <= response.status_code < 300 or not isinstance(body, dict) or body.get("error_code")
+        ):
+            code = body.get("error_code") if isinstance(body, dict) else None
+            error_code = f"，错误码 {code}" if isinstance(code, str) and re.fullmatch(r"openjiuwen\.\d+", code) else ""
+            raise MigrationError(f"Studio Manager 请求失败：HTTP {response.status_code}{error_code}")
         if not response.ok:
             raise MigrationError(f"Studio Manager 请求失败：HTTP {response.status_code}，{body}")
         return body.get("data", body)
@@ -97,6 +139,7 @@ class StudioManagerClient:
             self._url(f"/knowledges/dify-models:ensure?workspace_id={self.settings.workspace_id}"),
             json=payload,
             timeout=60,
+            allow_redirects=not self.console,
         )
         # 避免代理或参数错误响应回显凭据；仅保留错误码。
         try:
@@ -123,11 +166,14 @@ class StudioManagerClient:
             self._url(f"/knowledges?workspace_id={self.settings.workspace_id}"),
             json=payload,
             timeout=60,
+            allow_redirects=not self.console,
         )
         data = self._data(response)
         for key in ("knowledge_repo_id", "knowledgeRepoId", "id"):
             if data.get(key):
                 return str(data[key])
+        if self.console:
+            raise MigrationError("Studio 创建知识库响应缺少知识库 ID")
         raise MigrationError(f"创建知识库响应缺少 knowledge_repo_id：{data}")
 
     def import_document(
@@ -146,6 +192,7 @@ class StudioManagerClient:
             self._url(f"{suffix}{endpoint}?workspace_id={self.settings.workspace_id}"),
             files=files,
             timeout=300,
+            allow_redirects=not self.console,
         )
         return self._data(response)
 
@@ -161,6 +208,7 @@ class DifyKnowledgeMigrator:
         tenant_id: str,
         strategy: str,
         force: bool = False,
+        on_event: MigrationEvent | None = None,
     ):
         if strategy not in {"source_file", "segments"}:
             raise MigrationError("strategy 只能是 source_file 或 segments")
@@ -170,8 +218,9 @@ class DifyKnowledgeMigrator:
         self.tenant_id = tenant_id
         self.strategy = strategy
         self.force = force
+        self.on_event = on_event
         self._has_source_extract_type: bool | None = None
-        self._source_model_refs: dict[tuple[ModelType, str, str], dict[str, str]] = {}
+        self._source_model_refs: dict[tuple[ModelType, str, str], CachedSourceModel] = {}
         self.fingerprint = hashlib.sha256(
             f"{strategy}|{settings.project_id}|{settings.workspace_id}|{settings.instance_id}".encode()
         ).hexdigest()
@@ -181,15 +230,12 @@ class DifyKnowledgeMigrator:
     ) -> dict[str, int]:
         requested = set(dataset_ids or [])
         excluded = set(excluded_dataset_ids or [])
-        query = (
-            self.db.query(Dataset)
-            .filter(
-                Dataset.tenant_id == self.tenant_id,
-                Dataset.indexing_technique == "high_quality",
-            )
-            .order_by(Dataset.created_at, Dataset.id)
-        )
-        datasets = [item for item in query if (not requested or item.id in requested) and item.id not in excluded]
+        query = migration_datasets(self.tenant_id)
+        if requested:
+            query = query.where(Dataset.id.in_(requested))
+        if excluded:
+            query = query.where(Dataset.id.not_in(excluded))
+        datasets = self.db.scalars(query).all()
         result = {"datasets": 0, "succeeded": 0, "skipped": 0, "failed": 0, "documents": 0}
         logger.info(
             "Dify 知识库迁移开始：strategy=%s tenant_id=%s candidates=%d specified_datasets=%d excluded_datasets=%d",
@@ -201,6 +247,7 @@ class DifyKnowledgeMigrator:
         )
         for dataset_index, dataset in enumerate(datasets, start=1):
             result["datasets"] += 1
+            self._event("dataset_started", dataset)
             try:
                 logger.info(
                     "[知识库 %d/%d] 开始：name=%s dataset_id=%s strategy=%s",
@@ -216,6 +263,7 @@ class DifyKnowledgeMigrator:
                     continue
                 result["documents"] += imported_documents
                 result["succeeded"] += 1
+                self._event("dataset_succeeded", dataset)
                 logger.info(
                     "[知识库 %d/%d] 完成：name=%s imported_documents=%d",
                     dataset_index,
@@ -232,9 +280,18 @@ class DifyKnowledgeMigrator:
                     dataset.name,
                     dataset.id,
                 )
-                self._mark_dataset_failed(dataset, str(exc))
+                self.db.rollback()
+                error = str(exc)
+                if self.on_event is not None and not isinstance(exc, MigrationError):
+                    error = f"迁移处理失败（{type(exc).__name__}），请查看 Dify worker 日志"
+                self._mark_dataset_failed(dataset, error)
+                self._event("dataset_failed", dataset, error=error[:2000])
         logger.info("Dify 知识库迁移结束：%s", result)
         return result
+
+    def _event(self, event: str, dataset: Dataset, **details: str | int) -> None:
+        if self.on_event is not None:
+            self.on_event(event, dataset.id, details)
 
     def _progress(self, dataset: Dataset) -> DatasetMigrationProgress:
         progress = (
@@ -486,19 +543,44 @@ class DifyKnowledgeMigrator:
             if not provider and not name:
                 continue
             if not provider or not name:
+                self._record_source_model(dataset, model_type, str(provider or ""), str(name or ""), cache_hit=False)
                 raise MigrationError(f"Dify {model_type.value} 模型的供应商或名称缺失")
-            ref = self._ensure_source_model(manager, model_type, str(provider), str(name))
+            ref = self._ensure_source_model(dataset, manager, model_type, str(provider), str(name))
             payload[field] = {"type": ref_type, **ref}
         if payload["split_conf"].get("qa_enabled"):
-            ref = self._ensure_source_model(manager, ModelType.LLM, "", "")
+            ref = self._ensure_source_model(dataset, manager, ModelType.LLM, "", "")
             payload["split_conf"]["qa_model"] = ref["name"]
 
+    def _record_source_model(
+        self, dataset: Dataset, model_type: ModelType, provider: str, name: str, *, cache_hit: bool
+    ) -> None:
+        provider = provider or "-"
+        name = name or "-"
+        logger.info(
+            "Dify 迁移源模型：dataset_id=%s model_type=%s provider=%s model=%s cache=%s",
+            dataset.id,
+            model_type.value,
+            provider,
+            name,
+            "hit" if cache_hit else "miss",
+        )
+        self._event(
+            "model_cache_hit" if cache_hit else "model_cache_miss",
+            dataset,
+            model_type=model_type.value,
+            model_provider=provider,
+            model_name=name,
+        )
+
     def _ensure_source_model(
-        self, manager: ModelManager, model_type: ModelType, provider: str, name: str
+        self, dataset: Dataset, manager: ModelManager, model_type: ModelType, provider: str, name: str
     ) -> dict[str, str]:
         identity = (model_type, provider, name)
-        if identity in self._source_model_refs:
-            return self._source_model_refs[identity]
+        if cached := self._source_model_refs.get(identity):
+            self._record_source_model(dataset, model_type, cached.provider, cached.name, cache_hit=True)
+            return cached.studio_ref
+        source_provider, source_name = provider, name
+        step = "get_model_instance"
         try:
             instance = (
                 manager.get_model_instance(
@@ -507,16 +589,19 @@ class DifyKnowledgeMigrator:
                 if provider
                 else manager.get_default_model_instance(self.tenant_id, model_type)
             )
+            source_provider = provider or instance.provider
+            source_name = name or instance.model
+            step = "resolve_endpoint"
             endpoint, api_key = self._model_endpoint(instance, model_type)
-            model_name = str(instance.credentials.get("endpoint_model_name") or instance.model)
             config: dict[str, object] = {
                 "provider": instance.provider,
-                "model_name": model_name,
+                "model_name": source_name,
                 "model_type": model_type.value,
                 "api_url": endpoint,
                 "api_key": api_key,
             }
             if model_type == ModelType.TEXT_EMBEDDING:
+                step = "invoke_text_embedding"
                 result = instance.invoke_text_embedding(["Studio model migration"], user=self.tenant_id)
                 if not result.embeddings or not result.embeddings[0]:
                     raise MigrationError("Dify Embedding 模型未返回可用向量，无法确定维度")
@@ -525,10 +610,21 @@ class DifyKnowledgeMigrator:
             raise
         except Exception as exc:
             label = name if provider else "默认 LLM"
-            # 供应商异常可能包含凭据或完整 HTTP 响应，避免向迁移日志传播。
+            logger.error(  # noqa: TRY400 - Log the traceback without exception messages from the provider.
+                "读取 Dify 源模型失败：tenant_id=%s dataset_id=%s provider=%s model_type=%s model=%s step=%s\n%s",
+                self.tenant_id,
+                dataset.id,
+                source_provider,
+                model_type.value,
+                source_name or label,
+                step,
+                _format_source_model_traceback(exc),
+            )
             raise MigrationError(f"读取 Dify {model_type.value} 模型 {label} 失败（{type(exc).__name__}）") from None
+        finally:
+            self._record_source_model(dataset, model_type, source_provider, source_name, cache_hit=False)
         ref = self.client.ensure_model(config)
-        self._source_model_refs[identity] = ref
+        self._source_model_refs[identity] = CachedSourceModel(source_provider, source_name, ref)
         return ref
 
     def _source_file(
@@ -547,9 +643,8 @@ class DifyKnowledgeMigrator:
                     raise
             else:
                 return MigrationSourceFile(
-                    name=document.name or upload_file.name,
+                    name=upload_file.name,
                     mime_type=upload_file.mime_type or "application/octet-stream",
-                    original_name=upload_file.name,
                 ), content
         elif self.strategy != "segments":
             raise MigrationError(f"文档 {document.id} 未找到 Dify 上传源文件")
@@ -627,6 +722,13 @@ class DifyKnowledgeMigrator:
     def _migrate_dataset(self, dataset: Dataset) -> int | None:
         progress = self._progress(dataset)
         if progress.status == "SUCCEEDED" and not self.force:
+            self._event(
+                "dataset_skipped",
+                dataset,
+                total=progress.total_documents,
+                completed=progress.total_documents,
+                target=progress.target_knowledge_repo_id or "",
+            )
             return None
         documents = (
             self.db.query(Document)
@@ -641,6 +743,7 @@ class DifyKnowledgeMigrator:
             .all()
         )
         if not progress.target_knowledge_repo_id:
+            self._event("models", dataset, total=len(documents))
             payload = self._knowledge_payload(dataset, documents, extract_type=self._source_extract_type(dataset))
             self._attach_source_models(dataset, payload)
             logger.info(
@@ -679,7 +782,12 @@ class DifyKnowledgeMigrator:
             self.strategy,
         )
         count = 0
+        self.db.commit()
+        self._event(
+            "documents", dataset, total=len(documents), completed=start_index, target=progress.target_knowledge_repo_id
+        )
         for document_index, document in enumerate(documents[start_index:], start=start_index + 1):
+            self._event("document_started", dataset, document=document.name, index=document_index, total=len(documents))
             segments = self._segments(document) if self.strategy == "segments" else None
             upload_file, file_bytes = self._source_file(document, segments)
             source: dict[str, str | bool] = {
@@ -693,8 +801,8 @@ class DifyKnowledgeMigrator:
                 source["source_file_reconstructed"] = True
                 source["source_file_original_name"] = document.name
             payload: dict[str, object] = {
-                "document_name": document.name,
-                "source_file_name": upload_file.original_name or upload_file.name,
+                "document_name": upload_file.name,
+                "source_file_name": upload_file.name,
                 "schema_version": 2,
                 "strategy": self.strategy,
                 "source": source,
@@ -727,6 +835,9 @@ class DifyKnowledgeMigrator:
             progress.last_success_document_id = document.id
             progress.succeeded_documents += 1
             self.db.commit()
+            self._event(
+                "document_uploaded", dataset, document=document.name, completed=document_index, total=len(documents)
+            )
             count += 1
             logger.info(
                 "[文档 %d/%d] 导入成功：document_id=%s target_document_id=%s elapsed_seconds=%.2f progress=%d/%d",

@@ -52,3 +52,12 @@ pnpm test
 - Backend architecture adheres to DDD and Clean Architecture principles.
 - Async work runs through Celery with Redis as the broker.
 - Frontend user-facing strings must use `web/i18n/en-US/`; avoid hardcoded text.
+
+## 用户约定的迁移开发与上线导出规则
+
+- Dify 功能先修改并验证 D:/PycharmProjects/dify-1104，再同步到生产源码 D:/PycharmProjects/dify_tm/dify/ai_agent_api。
+- 迁移专用逻辑放在迁移模块内。普通知识库列表及权限筛选等原有业务逻辑须保留。
+- 只有用户明确说“开始上线打包”时，才把累计改动文件导出到桌面。日常开发和同步完成后，记录本批次改动即可。
+- 每次打包导出自上一次“开始上线打包”到当前的累计有效改动。确认导出成功后，再开启下一批次。已经回退的文件不计入交付。
+- 首批累计起点为用户要求“改下查该空间下需要迁移的知识库的逻辑……一切以我在前端界面看到知识库为准……”的那次修改。
+- 当前批次清单保存在 C:/tools/dify-migration-release/current-batch.json。后续每次修改迁移功能都更新该清单，打包前核对最终差异。部署源码按原项目相对路径导出。

@@ -18,7 +18,11 @@ class DatasetMigrationProgress(Base):
     __table_args__ = (
         sa.PrimaryKeyConstraint("id", name="dify_kb_migration_progress_pkey"),
         sa.UniqueConstraint(
-            "tenant_id", "dataset_id", "strategy", "project_id", "workspace_id",
+            "tenant_id",
+            "dataset_id",
+            "strategy",
+            "project_id",
+            "workspace_id",
             name="dify_kb_migration_progress_scope_uk",
         ),
         sa.Index("dify_kb_migration_progress_status_idx", "tenant_id", "strategy", "status"),
@@ -41,4 +45,26 @@ class DatasetMigrationProgress(Base):
     lease_expires_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     completed_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.current_timestamp())
-    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, nullable=False, server_default=func.current_timestamp(), onupdate=func.current_timestamp()
+    )
+
+
+class DatasetMigrationRun(Base):
+    __tablename__ = "dify_kb_migration_runs"
+    __table_args__ = (
+        sa.PrimaryKeyConstraint("id", name="dify_kb_migration_runs_pkey"),
+        sa.Index("dify_kb_migration_runs_tenant_created_idx", "tenant_id", "created_at"),
+    )
+
+    id: Mapped[str] = mapped_column(StringUUID)
+    tenant_id: Mapped[str] = mapped_column(StringUUID, nullable=False)
+    project_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    workspace_id: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    options: Mapped[dict] = mapped_column(sa.JSON, nullable=False)
+    datasets: Mapped[dict] = mapped_column(sa.JSON, nullable=False)
+    logs: Mapped[list] = mapped_column(sa.JSON, nullable=False)
+    retry_of: Mapped[str | None] = mapped_column(StringUUID)
+    created_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.current_timestamp())
+    updated_at: Mapped[datetime] = mapped_column(DateTime, server_default=func.current_timestamp())

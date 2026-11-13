@@ -96,7 +96,7 @@ def init_app(app: DifyApp) -> Celery:
     celery_app.set_default()
     app.extensions["celery"] = celery_app
 
-    imports = []
+    imports = ["tasks.dify_kb_migration_task"]
     day = dify_config.CELERY_BEAT_SCHEDULER_TIME
 
     # if you add a new task, please add the switch to CeleryScheduleTasksConfig
