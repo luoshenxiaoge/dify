@@ -1,0 +1,3008 @@
+[
+  {
+    "p": 1,
+    "start": 0,
+    "end": 13,
+    "style": "一级条标题",
+    "list": "",
+    "table": false,
+    "text": "            "
+  },
+  {
+    "p": 8,
+    "start": 19,
+    "end": 28,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "中国邮政储蓄银行"
+  },
+  {
+    "p": 9,
+    "start": 28,
+    "end": 36,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "科技数智化中台"
+  },
+  {
+    "p": 10,
+    "start": 36,
+    "end": 45,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "XXXX业务需求"
+  },
+  {
+    "p": 16,
+    "start": 50,
+    "end": 79,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "            编制单位：(业务部门或技术部门)"
+  },
+  {
+    "p": 17,
+    "start": 79,
+    "end": 96,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "            版本号:"
+  },
+  {
+    "p": 18,
+    "start": 96,
+    "end": 114,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "    日  期：    年  月"
+  },
+  {
+    "p": 19,
+    "start": 114,
+    "end": 115,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "\f"
+  },
+  {
+    "p": 22,
+    "start": 117,
+    "end": 127,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "编写组组长:陈英傑"
+  },
+  {
+    "p": 24,
+    "start": 128,
+    "end": 134,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "编写人员:"
+  },
+  {
+    "p": 25,
+    "start": 134,
+    "end": 148,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "(参加需求编写的所有人员)"
+  },
+  {
+    "p": 26,
+    "start": 148,
+    "end": 151,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "序号"
+  },
+  {
+    "p": 27,
+    "start": 151,
+    "end": 154,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "姓名"
+  },
+  {
+    "p": 28,
+    "start": 154,
+    "end": 157,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "部门"
+  },
+  {
+    "p": 29,
+    "start": 157,
+    "end": 160,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "处室"
+  },
+  {
+    "p": 31,
+    "start": 161,
+    "end": 163,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "1"
+  },
+  {
+    "p": 32,
+    "start": 163,
+    "end": 166,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 33,
+    "start": 166,
+    "end": 173,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "软件研发中心"
+  },
+  {
+    "p": 34,
+    "start": 173,
+    "end": 182,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "西安项目建设一处"
+  },
+  {
+    "p": 37,
+    "start": 184,
+    "end": 186,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 38,
+    "start": 186,
+    "end": 188,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 39,
+    "start": 188,
+    "end": 190,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 42,
+    "start": 192,
+    "end": 194,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 43,
+    "start": 194,
+    "end": 196,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 44,
+    "start": 196,
+    "end": 198,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 47,
+    "start": 200,
+    "end": 202,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 48,
+    "start": 202,
+    "end": 204,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 49,
+    "start": 204,
+    "end": 206,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 52,
+    "start": 208,
+    "end": 210,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 53,
+    "start": 210,
+    "end": 212,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 54,
+    "start": 212,
+    "end": 214,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 57,
+    "start": 216,
+    "end": 218,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 58,
+    "start": 218,
+    "end": 220,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 59,
+    "start": 220,
+    "end": 222,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "　"
+  },
+  {
+    "p": 64,
+    "start": 226,
+    "end": 231,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "修订记录"
+  },
+  {
+    "p": 66,
+    "start": 232,
+    "end": 235,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "序号"
+  },
+  {
+    "p": 67,
+    "start": 235,
+    "end": 240,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "修改日期"
+  },
+  {
+    "p": 68,
+    "start": 240,
+    "end": 244,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "修改人"
+  },
+  {
+    "p": 69,
+    "start": 244,
+    "end": 248,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "版本号"
+  },
+  {
+    "p": 70,
+    "start": 248,
+    "end": 253,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "修改章节"
+  },
+  {
+    "p": 71,
+    "start": 253,
+    "end": 258,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "修改内容"
+  },
+  {
+    "p": 72,
+    "start": 258,
+    "end": 263,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "修改类型"
+  },
+  {
+    "p": 73,
+    "start": 263,
+    "end": 267,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "审核人"
+  },
+  {
+    "p": 75,
+    "start": 268,
+    "end": 270,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "1"
+  },
+  {
+    "p": 76,
+    "start": 270,
+    "end": 280,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 77,
+    "start": 280,
+    "end": 283,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 78,
+    "start": 283,
+    "end": 288,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 79,
+    "start": 288,
+    "end": 292,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 80,
+    "start": 292,
+    "end": 308,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "知识库文档列表新增FAQ问答对"
+  },
+  {
+    "p": 81,
+    "start": 308,
+    "end": 311,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 82,
+    "start": 311,
+    "end": 315,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 84,
+    "start": 316,
+    "end": 318,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2"
+  },
+  {
+    "p": 85,
+    "start": 318,
+    "end": 328,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 86,
+    "start": 328,
+    "end": 331,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 87,
+    "start": 331,
+    "end": 336,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 88,
+    "start": 336,
+    "end": 340,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 89,
+    "start": 340,
+    "end": 358,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.2知识库文档列表新增FAQ文档"
+  },
+  {
+    "p": 90,
+    "start": 358,
+    "end": 361,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 91,
+    "start": 361,
+    "end": 365,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 93,
+    "start": 366,
+    "end": 368,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "3"
+  },
+  {
+    "p": 94,
+    "start": 368,
+    "end": 378,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 95,
+    "start": 378,
+    "end": 381,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 96,
+    "start": 381,
+    "end": 386,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 97,
+    "start": 386,
+    "end": 390,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 98,
+    "start": 390,
+    "end": 409,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.3知识库文档列表新增标签管理功能"
+  },
+  {
+    "p": 99,
+    "start": 409,
+    "end": 412,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 100,
+    "start": 412,
+    "end": 416,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 102,
+    "start": 417,
+    "end": 419,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "4"
+  },
+  {
+    "p": 103,
+    "start": 419,
+    "end": 429,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 104,
+    "start": 429,
+    "end": 432,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 105,
+    "start": 432,
+    "end": 437,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 106,
+    "start": 437,
+    "end": 441,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 107,
+    "start": 441,
+    "end": 463,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.4知识库文档列表页文件上传功能模块优化"
+  },
+  {
+    "p": 108,
+    "start": 463,
+    "end": 466,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 109,
+    "start": 466,
+    "end": 470,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 111,
+    "start": 471,
+    "end": 473,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "5"
+  },
+  {
+    "p": 112,
+    "start": 473,
+    "end": 483,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 113,
+    "start": 483,
+    "end": 486,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 114,
+    "start": 486,
+    "end": 491,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 115,
+    "start": 491,
+    "end": 495,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 116,
+    "start": 495,
+    "end": 510,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.5知识库服务支持父子分片"
+  },
+  {
+    "p": 117,
+    "start": 510,
+    "end": 513,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 118,
+    "start": 513,
+    "end": 517,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 120,
+    "start": 518,
+    "end": 520,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "6"
+  },
+  {
+    "p": 121,
+    "start": 520,
+    "end": 530,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 122,
+    "start": 530,
+    "end": 533,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 123,
+    "start": 533,
+    "end": 538,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 124,
+    "start": 538,
+    "end": 542,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 125,
+    "start": 542,
+    "end": 559,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.6知识库api接口优化和隐藏"
+  },
+  {
+    "p": 126,
+    "start": 559,
+    "end": 562,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 127,
+    "start": 562,
+    "end": 566,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 129,
+    "start": 567,
+    "end": 569,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "7"
+  },
+  {
+    "p": 130,
+    "start": 569,
+    "end": 579,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 131,
+    "start": 579,
+    "end": 582,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 132,
+    "start": 582,
+    "end": 587,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 133,
+    "start": 587,
+    "end": 591,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 134,
+    "start": 591,
+    "end": 612,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.7知识库api接口支持全局业务跟踪号"
+  },
+  {
+    "p": 135,
+    "start": 612,
+    "end": 615,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 136,
+    "start": 615,
+    "end": 619,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 138,
+    "start": 620,
+    "end": 622,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "8"
+  },
+  {
+    "p": 139,
+    "start": 622,
+    "end": 632,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 140,
+    "start": 632,
+    "end": 635,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 141,
+    "start": 635,
+    "end": 640,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 142,
+    "start": 640,
+    "end": 644,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 143,
+    "start": 644,
+    "end": 667,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.8工作流文件解析插件功能修复和ocr支持"
+  },
+  {
+    "p": 144,
+    "start": 667,
+    "end": 670,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 145,
+    "start": 670,
+    "end": 674,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 147,
+    "start": 675,
+    "end": 677,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "9"
+  },
+  {
+    "p": 148,
+    "start": 677,
+    "end": 687,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 149,
+    "start": 687,
+    "end": 690,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 150,
+    "start": 690,
+    "end": 695,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 151,
+    "start": 695,
+    "end": 699,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 152,
+    "start": 699,
+    "end": 715,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.9知识库支持ocr文件解析"
+  },
+  {
+    "p": 153,
+    "start": 715,
+    "end": 718,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 154,
+    "start": 718,
+    "end": 722,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 156,
+    "start": 723,
+    "end": 726,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "10"
+  },
+  {
+    "p": 157,
+    "start": 726,
+    "end": 736,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 158,
+    "start": 736,
+    "end": 739,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 159,
+    "start": 739,
+    "end": 744,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 160,
+    "start": 744,
+    "end": 748,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 161,
+    "start": 748,
+    "end": 773,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.10知识库和reranker模型配置添加开关"
+  },
+  {
+    "p": 162,
+    "start": 773,
+    "end": 776,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 163,
+    "start": 776,
+    "end": 780,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 165,
+    "start": 781,
+    "end": 784,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "11"
+  },
+  {
+    "p": 166,
+    "start": 784,
+    "end": 794,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 167,
+    "start": 794,
+    "end": 797,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 168,
+    "start": 797,
+    "end": 802,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 169,
+    "start": 802,
+    "end": 806,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 170,
+    "start": 806,
+    "end": 821,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.11知识库支持外部知识库"
+  },
+  {
+    "p": 171,
+    "start": 821,
+    "end": 824,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 172,
+    "start": 824,
+    "end": 828,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 174,
+    "start": 829,
+    "end": 832,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "12"
+  },
+  {
+    "p": 175,
+    "start": 832,
+    "end": 842,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 176,
+    "start": 842,
+    "end": 845,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 177,
+    "start": 845,
+    "end": 850,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 178,
+    "start": 850,
+    "end": 854,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 179,
+    "start": 854,
+    "end": 880,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.12工作流知识库节点对接 SkyWalking"
+  },
+  {
+    "p": 180,
+    "start": 880,
+    "end": 883,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 181,
+    "start": 883,
+    "end": 887,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 183,
+    "start": 888,
+    "end": 891,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "13"
+  },
+  {
+    "p": 184,
+    "start": 891,
+    "end": 901,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 185,
+    "start": 901,
+    "end": 904,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 186,
+    "start": 904,
+    "end": 909,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 187,
+    "start": 909,
+    "end": 913,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 188,
+    "start": 913,
+    "end": 932,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.13工作流知识库节点支持查看图片"
+  },
+  {
+    "p": 189,
+    "start": 932,
+    "end": 935,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 190,
+    "start": 935,
+    "end": 939,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 192,
+    "start": 940,
+    "end": 943,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "14"
+  },
+  {
+    "p": 193,
+    "start": 943,
+    "end": 953,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 194,
+    "start": 953,
+    "end": 956,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 195,
+    "start": 956,
+    "end": 961,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 196,
+    "start": 961,
+    "end": 965,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 197,
+    "start": 965,
+    "end": 981,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.14知识库检索接口性能优化"
+  },
+  {
+    "p": 198,
+    "start": 981,
+    "end": 984,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 199,
+    "start": 984,
+    "end": 988,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 201,
+    "start": 989,
+    "end": 992,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "15"
+  },
+  {
+    "p": 202,
+    "start": 992,
+    "end": 1002,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 203,
+    "start": 1002,
+    "end": 1005,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 204,
+    "start": 1005,
+    "end": 1010,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 205,
+    "start": 1010,
+    "end": 1014,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 206,
+    "start": 1014,
+    "end": 1030,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.15知识库支持层级分段功能"
+  },
+  {
+    "p": 207,
+    "start": 1030,
+    "end": 1033,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 208,
+    "start": 1033,
+    "end": 1037,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 210,
+    "start": 1038,
+    "end": 1041,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "16"
+  },
+  {
+    "p": 211,
+    "start": 1041,
+    "end": 1051,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 212,
+    "start": 1051,
+    "end": 1054,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 213,
+    "start": 1054,
+    "end": 1059,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 214,
+    "start": 1059,
+    "end": 1063,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 215,
+    "start": 1063,
+    "end": 1077,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.16知识库检索效果评估"
+  },
+  {
+    "p": 216,
+    "start": 1077,
+    "end": 1080,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 217,
+    "start": 1080,
+    "end": 1084,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 219,
+    "start": 1085,
+    "end": 1088,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "17"
+  },
+  {
+    "p": 220,
+    "start": 1088,
+    "end": 1098,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 221,
+    "start": 1098,
+    "end": 1101,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 222,
+    "start": 1101,
+    "end": 1106,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 223,
+    "start": 1106,
+    "end": 1110,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 224,
+    "start": 1110,
+    "end": 1124,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.17支持运用态应用鉴权"
+  },
+  {
+    "p": 225,
+    "start": 1124,
+    "end": 1127,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 226,
+    "start": 1127,
+    "end": 1131,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 228,
+    "start": 1132,
+    "end": 1135,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "18"
+  },
+  {
+    "p": 229,
+    "start": 1135,
+    "end": 1145,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 230,
+    "start": 1145,
+    "end": 1148,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 231,
+    "start": 1148,
+    "end": 1153,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 232,
+    "start": 1153,
+    "end": 1157,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 233,
+    "start": 1157,
+    "end": 1184,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.18支持测试环境与生产环境鉴权API-Key一致"
+  },
+  {
+    "p": 234,
+    "start": 1184,
+    "end": 1187,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 235,
+    "start": 1187,
+    "end": 1191,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 237,
+    "start": 1192,
+    "end": 1195,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "19"
+  },
+  {
+    "p": 238,
+    "start": 1195,
+    "end": 1205,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 239,
+    "start": 1205,
+    "end": 1208,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 240,
+    "start": 1208,
+    "end": 1213,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 241,
+    "start": 1213,
+    "end": 1217,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 242,
+    "start": 1217,
+    "end": 1235,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.19支持生产环境智能体级联更新"
+  },
+  {
+    "p": 243,
+    "start": 1235,
+    "end": 1238,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 244,
+    "start": 1238,
+    "end": 1242,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 246,
+    "start": 1243,
+    "end": 1246,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "20"
+  },
+  {
+    "p": 247,
+    "start": 1246,
+    "end": 1256,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 248,
+    "start": 1256,
+    "end": 1259,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 249,
+    "start": 1259,
+    "end": 1264,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 250,
+    "start": 1264,
+    "end": 1268,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 251,
+    "start": 1268,
+    "end": 1289,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.20支持迭代器组件，实现节点并行运行"
+  },
+  {
+    "p": 252,
+    "start": 1289,
+    "end": 1292,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 253,
+    "start": 1292,
+    "end": 1296,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 255,
+    "start": 1297,
+    "end": 1300,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "21"
+  },
+  {
+    "p": 256,
+    "start": 1300,
+    "end": 1310,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 257,
+    "start": 1310,
+    "end": 1313,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 258,
+    "start": 1313,
+    "end": 1318,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 259,
+    "start": 1318,
+    "end": 1322,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 260,
+    "start": 1322,
+    "end": 1338,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.21智能体管理节点缺陷补充"
+  },
+  {
+    "p": 261,
+    "start": 1338,
+    "end": 1341,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 262,
+    "start": 1341,
+    "end": 1345,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 264,
+    "start": 1346,
+    "end": 1349,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "22"
+  },
+  {
+    "p": 265,
+    "start": 1349,
+    "end": 1359,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 266,
+    "start": 1359,
+    "end": 1362,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 267,
+    "start": 1362,
+    "end": 1367,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 268,
+    "start": 1367,
+    "end": 1371,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 269,
+    "start": 1371,
+    "end": 1388,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.22支持工作流中引用单智能体"
+  },
+  {
+    "p": 270,
+    "start": 1388,
+    "end": 1391,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 271,
+    "start": 1391,
+    "end": 1395,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 273,
+    "start": 1396,
+    "end": 1399,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "23"
+  },
+  {
+    "p": 274,
+    "start": 1399,
+    "end": 1409,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 275,
+    "start": 1409,
+    "end": 1412,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 276,
+    "start": 1412,
+    "end": 1417,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 277,
+    "start": 1417,
+    "end": 1421,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 278,
+    "start": 1421,
+    "end": 1439,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "runtime服务吐露监控指标数据"
+  },
+  {
+    "p": 279,
+    "start": 1439,
+    "end": 1442,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 280,
+    "start": 1442,
+    "end": 1446,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 282,
+    "start": 1447,
+    "end": 1450,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "24"
+  },
+  {
+    "p": 283,
+    "start": 1450,
+    "end": 1460,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 284,
+    "start": 1460,
+    "end": 1463,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 285,
+    "start": 1463,
+    "end": 1468,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 286,
+    "start": 1468,
+    "end": 1472,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 287,
+    "start": 1472,
+    "end": 1485,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.24 透传必要请求头"
+  },
+  {
+    "p": 288,
+    "start": 1485,
+    "end": 1488,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 289,
+    "start": 1488,
+    "end": 1492,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 291,
+    "start": 1493,
+    "end": 1496,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "25"
+  },
+  {
+    "p": 292,
+    "start": 1496,
+    "end": 1506,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 293,
+    "start": 1506,
+    "end": 1509,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 294,
+    "start": 1509,
+    "end": 1514,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 295,
+    "start": 1514,
+    "end": 1518,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 296,
+    "start": 1518,
+    "end": 1558,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "Runtime和manager服务解析sw8请求头，并按照规则往下游传递sw8"
+  },
+  {
+    "p": 297,
+    "start": 1558,
+    "end": 1561,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 298,
+    "start": 1561,
+    "end": 1565,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 300,
+    "start": 1566,
+    "end": 1569,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "26"
+  },
+  {
+    "p": 301,
+    "start": 1569,
+    "end": 1579,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 302,
+    "start": 1579,
+    "end": 1582,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 303,
+    "start": 1582,
+    "end": 1587,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 304,
+    "start": 1587,
+    "end": 1591,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 305,
+    "start": 1591,
+    "end": 1628,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.26 Manager服务和runtime服务使用otel实现链路监控"
+  },
+  {
+    "p": 306,
+    "start": 1628,
+    "end": 1631,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 307,
+    "start": 1631,
+    "end": 1635,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 309,
+    "start": 1636,
+    "end": 1639,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "27"
+  },
+  {
+    "p": 310,
+    "start": 1639,
+    "end": 1649,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 311,
+    "start": 1649,
+    "end": 1652,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 312,
+    "start": 1652,
+    "end": 1657,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 313,
+    "start": 1657,
+    "end": 1661,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 314,
+    "start": 1661,
+    "end": 1694,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.27runtime服务使用otel吐露工作流节点执行链路数据"
+  },
+  {
+    "p": 315,
+    "start": 1694,
+    "end": 1697,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 316,
+    "start": 1697,
+    "end": 1701,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 318,
+    "start": 1702,
+    "end": 1705,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "28"
+  },
+  {
+    "p": 319,
+    "start": 1705,
+    "end": 1715,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2026.8.25"
+  },
+  {
+    "p": 320,
+    "start": 1715,
+    "end": 1718,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "唐娜"
+  },
+  {
+    "p": 321,
+    "start": 1718,
+    "end": 1723,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "V1.0"
+  },
+  {
+    "p": 322,
+    "start": 1723,
+    "end": 1727,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.1"
+  },
+  {
+    "p": 323,
+    "start": 1727,
+    "end": 1749,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "2.28单智能体接入 DeepAgent "
+  },
+  {
+    "p": 324,
+    "start": 1749,
+    "end": 1752,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "新增"
+  },
+  {
+    "p": 325,
+    "start": 1752,
+    "end": 1756,
+    "style": "附录标题说明",
+    "list": "",
+    "table": true,
+    "text": "陈英傑"
+  },
+  {
+    "p": 336,
+    "start": 1766,
+    "end": 1780,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "\f1业务需求概述 （选填）"
+  },
+  {
+    "p": 337,
+    "start": 1780,
+    "end": 1785,
+    "style": "正文",
+    "list": "1.1",
+    "table": false,
+    "text": "项目背景"
+  },
+  {
+    "p": 338,
+    "start": 1785,
+    "end": 1833,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "<1、需要描述目前市场现状、业务发展状况及未来业务发展趋势，并对项目的市场定位及前景进行说明。"
+  },
+  {
+    "p": 339,
+    "start": 1833,
+    "end": 1903,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "2、痛点分析，说明当前业务发展面临的问题，重点指出原有IT系统哪些功能存在缺失或无法满足业务发展的要求，对业务需求提出的必要性进行说明。>"
+  },
+  {
+    "p": 340,
+    "start": 1903,
+    "end": 1908,
+    "style": "正文",
+    "list": "1.2",
+    "table": false,
+    "text": "业务目标"
+  },
+  {
+    "p": 341,
+    "start": 1908,
+    "end": 1965,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "<指出系统实施后将达成的业务目标，例如：建立某平台、实现某产品或业务的服务；并说明业务目标与业务价值的关联性。>"
+  },
+  {
+    "p": 342,
+    "start": 1965,
+    "end": 1970,
+    "style": "正文",
+    "list": "1.3",
+    "table": false,
+    "text": "关联领域"
+  },
+  {
+    "p": 343,
+    "start": 1970,
+    "end": 2077,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "(规划标准       (项目管理      (架构管理      (需求管理     (质量与效能    (制度与内控     (安全管理      (创新实验      (业务研发     (数据治理    "
+  },
+  {
+    "p": 344,
+    "start": 2077,
+    "end": 2130,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "(数据安全       (数据分析      (集成管理      (产品研发     (研发安全   "
+  },
+  {
+    "p": 345,
+    "start": 2130,
+    "end": 2233,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "(业务测试       (技术测试      (运维安全      (运行调度     (应用管理    \u000b(云资源         (系统管理      (网络管理      (动力管理     (其他"
+  },
+  {
+    "p": 346,
+    "start": 2233,
+    "end": 2240,
+    "style": "正文",
+    "list": "2",
+    "table": false,
+    "text": "业务需求描述"
+  },
+  {
+    "p": 348,
+    "start": 2241,
+    "end": 2257,
+    "style": "正文",
+    "list": "2.1",
+    "table": false,
+    "text": "知识库文档列表新增FAQ问答对"
+  },
+  {
+    "p": 349,
+    "start": 2257,
+    "end": 2262,
+    "style": "正文",
+    "list": "2.1.1",
+    "table": false,
+    "text": "功能概述"
+  },
+  {
+    "p": 350,
+    "start": 2262,
+    "end": 2467,
+    "style": "index 61",
+    "list": "",
+    "table": false,
+    "text": "知识库详情页提供【FAQ 问答对】页签，作为单条问答的主数据入口，支持手工创建、搜索、编辑与删除问答对；也可通过上传 FAQ 文档批量导入（详见「FAQ 文档」功能）。两条路径写入同一问答对列表，但均不走知识文件的解析、切分与向量索引流程。删除 FAQ 文档时会级联删除其导入的全部问答对。工作流【知识检索】节点提供「启用 FAQ」开关，开启后优先检索问答对，命中即可直接返回答案，未命中再检索知识文件切片。"
+  },
+  {
+    "p": 351,
+    "start": 2467,
+    "end": 2472,
+    "style": "正文",
+    "list": "2.1.2",
+    "table": false,
+    "text": "业务流程"
+  },
+  {
+    "p": 352,
+    "start": 2472,
+    "end": 2554,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "1. 手工维护：进入【FAQ 问答对】页签，点击【创建】填写标准问题、答案（可选最多 4 条相似问题）；列表支持按问题或答案搜索、查看、编辑，以及单条或批量删除。"
+  },
+  {
+    "p": 353,
+    "start": 2554,
+    "end": 2620,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "2. 批量导入：上传符合模版的 Excel / Word FAQ 文档，系统解析后将合法问答对写入列表，与手工创建的条目混排展示。"
+  },
+  {
+    "p": 354,
+    "start": 2620,
+    "end": 2672,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "3. 只删问答对：在【FAQ 问答对】中删除条目仅移除选中的问答对，不影响源 FAQ 文档及其它条目。"
+  },
+  {
+    "p": 355,
+    "start": 2672,
+    "end": 2731,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "4. 删文档级联：删除 FAQ 文档并确认后，该文档导入的全部问答对同步删除；手工创建及其它文档导入的条目不受影响。"
+  },
+  {
+    "p": 356,
+    "start": 2731,
+    "end": 2828,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "5. 检索启用：在【知识检索】节点绑定知识库并开启「启用 FAQ」后，运行时优先按用户问题匹配问答对；命中且达到直出阈值时直接返回答案（不经过大模型总结），未命中再按检索策略查询知识文件切片。"
+  },
+  {
+    "p": 357,
+    "start": 2828,
+    "end": 2833,
+    "style": "正文",
+    "list": "2.1.3",
+    "table": false,
+    "text": "业务规则"
+  },
+  {
+    "p": 359,
+    "start": 2834,
+    "end": 2892,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "1. 问答对字段：标准问题必填、答案必填、相似问题最多 4 条可选；列表按问题或答案模糊搜索，按创建时间倒序排列。"
+  },
+  {
+    "p": 360,
+    "start": 2892,
+    "end": 2971,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "2. 两条写入路径：手工创建与文档导入写入同一问答对列表，均可编辑、删除；编辑文档导入的问答对不会解除与源文档的关联，删除该文档时这条问答对仍会被级联删除。"
+  },
+  {
+    "p": 361,
+    "start": 2971,
+    "end": 3060,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "3. 删除语义：只删问答对不影响源文档；删除 FAQ 文档需二次确认「将同步删除文档包含的 FAQ 问答对」，级联删除该文档导入的全部条目；手工创建及其它文档导入的问答对保留。"
+  },
+  {
+    "p": 362,
+    "start": 3060,
+    "end": 3135,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "4. 启用 FAQ 开关：位于工作流【知识检索】节点的知识库设置中，默认关闭；开启后优先检索问答对（会带来一定性能开销），关闭时仅检索知识文件切片。"
+  },
+  {
+    "p": 363,
+    "start": 3135,
+    "end": 3219,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "5. FAQ 直出阈值：默认 0.9；命中分数超过该阈值的问答对作为答案直接输出，不经大模型总结。精确匹配得分 1.0、包含匹配得分 0.9，默认阈值下两类均可直出。"
+  },
+  {
+    "p": 364,
+    "start": 3219,
+    "end": 3278,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "6. 相关度阈值与返回条数：相关度阈值默认 0.5，低于该分的检索结果被过滤；Top K 默认 3，按分数降序返回。"
+  },
+  {
+    "p": 365,
+    "start": 3278,
+    "end": 3338,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "7. 数据前提：FAQ 检索生效的前提是问答对已存在（手工创建或文档导入）；删除文档级联删除后，对应问答对不再被召回。"
+  },
+  {
+    "p": 366,
+    "start": 3338,
+    "end": 3346,
+    "style": "正文",
+    "list": "2.1.4",
+    "table": false,
+    "text": "角色及操作权限"
+  },
+  {
+    "p": 367,
+    "start": 3346,
+    "end": 3354,
+    "style": "index 61",
+    "list": "",
+    "table": false,
+    "text": "可登录系统用户"
+  },
+  {
+    "p": 368,
+    "start": 3354,
+    "end": 3359,
+    "style": "正文",
+    "list": "2.1.5",
+    "table": false,
+    "text": "输入信息"
+  },
+  {
+    "p": 369,
+    "start": 3359,
+    "end": 3363,
+    "style": "index 61",
+    "list": "",
+    "table": false,
+    "text": "不涉及"
+  },
+  {
+    "p": 370,
+    "start": 3363,
+    "end": 3368,
+    "style": "正文",
+    "list": "2.1.6",
+    "table": false,
+    "text": "输出信息"
+  },
+  {
+    "p": 371,
+    "start": 3368,
+    "end": 3378,
+    "style": "index 61",
+    "list": "",
+    "table": false,
+    "text": "      不涉及"
+  },
+  {
+    "p": 372,
+    "start": 3378,
+    "end": 3383,
+    "style": "正文",
+    "list": "2.1.7",
+    "table": false,
+    "text": "界面原型"
+  },
+  {
+    "p": 373,
+    "start": 3383,
+    "end": 3387,
+    "style": "index 61",
+    "list": "",
+    "table": false,
+    "text": "不涉及"
+  },
+  {
+    "p": 374,
+    "start": 3387,
+    "end": 3392,
+    "style": "正文",
+    "list": "2.1.8",
+    "table": false,
+    "text": "其他说明"
+  },
+  {
+    "p": 375,
+    "start": 3392,
+    "end": 3396,
+    "style": "index 61",
+    "list": "",
+    "table": false,
+    "text": "不涉及"
+  },
+  {
+    "p": 376,
+    "start": 3396,
+    "end": 3405,
+    "style": "正文",
+    "list": "3",
+    "table": false,
+    "text": "关联系统业务需求"
+  },
+  {
+    "p": 377,
+    "start": 3405,
+    "end": 3423,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "< 本需求共涉及关联系统XXX个>"
+  },
+  {
+    "p": 378,
+    "start": 3423,
+    "end": 3433,
+    "style": "正文",
+    "list": "3.1",
+    "table": false,
+    "text": " 关联系统配套需求"
+  },
+  {
+    "p": 379,
+    "start": 3433,
+    "end": 3461,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "<识别本系统所涉及的关联系统,可参考如下表格形式列示："
+  },
+  {
+    "p": 380,
+    "start": 3461,
+    "end": 3508,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及前端界面的，应说明与统一柜面管理平台、网点系统整合工程、邮连系统的关系。"
+  },
+  {
+    "p": 381,
+    "start": 3508,
+    "end": 3567,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及客户信息、客户营销、客户关系、客户维护等的，应说明与客户信息平台、客户关系管理（CRM）的关系。"
+  },
+  {
+    "p": 382,
+    "start": 3567,
+    "end": 3599,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及产品与服务的，应说明与产品管理平台的关系。"
+  },
+  {
+    "p": 383,
+    "start": 3599,
+    "end": 3637,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及渠道的，应说明涉及的电子渠道范围，及不适用渠道的理由。"
+  },
+  {
+    "p": 384,
+    "start": 3637,
+    "end": 3677,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及账户及其簿记的，应说明与资金清算系统、会计处理平台的关系。"
+  },
+  {
+    "p": 385,
+    "start": 3677,
+    "end": 3777,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及机构管理、人员/柜员管理、角色权限管理、登录认证的，应说明与机构管理系统、柜员管理系统、渠道管理平台、统一身份认证系统、生物识别的关系。登录密码的设置规则应遵循密码安全管理要求。"
+  },
+  {
+    "p": 386,
+    "start": 3777,
+    "end": 3819,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及文本文件、音视频等非结构化数据的，应说明与内容管理平台的关系。"
+  },
+  {
+    "p": 387,
+    "start": 3819,
+    "end": 3868,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及知识库、知识发现、知识问答的，应说明与知识图谱平台、企业知识管理系统的关系。"
+  },
+  {
+    "p": 388,
+    "start": 3868,
+    "end": 3968,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及数字人民币的，应说明与数字人民币核心系统、数字人民币场景应用系统、数字人民币互联互通前置系统、数字人民币toC前置系统、数字人民币银银前置系统、数字人民币业务运行管理系统的关系。"
+  },
+  {
+    "p": 389,
+    "start": 3968,
+    "end": 3996,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及地图的，应说与基础地图服务的关系。"
+  },
+  {
+    "p": 390,
+    "start": 3996,
+    "end": 4025,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及反洗钱的，应说明与反洗钱系统的关系。"
+  },
+  {
+    "p": 391,
+    "start": 4025,
+    "end": 4053,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及欺诈的，应说明与反欺诈系统的关系。"
+  },
+  {
+    "p": 392,
+    "start": 4053,
+    "end": 4084,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及授信的，应说明与统一授信管理系统的关系。"
+  },
+  {
+    "p": 393,
+    "start": 4084,
+    "end": 4113,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及催收的，应说明与客户催收系统的关系。"
+  },
+  {
+    "p": 394,
+    "start": 4113,
+    "end": 4143,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "对于业务需求内容涉及前置的，应说明与统一前置平台的关系。>"
+  },
+  {
+    "p": 395,
+    "start": 4143,
+    "end": 4146,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "序号"
+  },
+  {
+    "p": 396,
+    "start": 4146,
+    "end": 4153,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "关联系统名称"
+  },
+  {
+    "p": 397,
+    "start": 4153,
+    "end": 4158,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "配合内容"
+  },
+  {
+    "p": 399,
+    "start": 4159,
+    "end": 4161,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "1"
+  },
+  {
+    "p": 401,
+    "start": 4162,
+    "end": 4198,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "具体配合改造内容（包含关联系统数据需求）/系统不涉及改造，仅需配合测试"
+  },
+  {
+    "p": 403,
+    "start": 4199,
+    "end": 4201,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "2"
+  },
+  {
+    "p": 407,
+    "start": 4204,
+    "end": 4206,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "3"
+  },
+  {
+    "p": 411,
+    "start": 4209,
+    "end": 4211,
+    "style": "正文",
+    "list": "",
+    "table": true,
+    "text": "4"
+  },
+  {
+    "p": 415,
+    "start": 4214,
+    "end": 4225,
+    "style": "正文",
+    "list": "4",
+    "table": false,
+    "text": "非功能性需求（选填）"
+  },
+  {
+    "p": 416,
+    "start": 4225,
+    "end": 4286,
+    "style": "正文",
+    "list": "",
+    "table": false,
+    "text": "请填写涉及的非功能性需求（包括但不限于对于数据、安全、性能、容量、业务连续性、灾备、监控、可靠性、易用性等方面的要求。）"
+  }
+]
